@@ -6,12 +6,12 @@ function _GET(path) --> status(bool), errorMsg(string), content -- Читает 
     local handle = http.get(prefix .. path)
 	
     if (handle == nil) or (handle.getResponseCode() ~= 200) then
-        return '"' .. path .. '" not responding', ""
+        return false, '"' .. path .. '" not responding', ""
     end
 	
     local content = handle.readAll()
     handle.close()
-    return nil, content
+    return true, nil, content
 end
 
 function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонирует данные с ГитХаба
@@ -21,7 +21,8 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
     end
 
     if repo == nil then -- Если в параметрах не был указан репозиторий
-        if (fin = fs.open(curdir .. listname, "r")) ~= nil then -- Если в файлах на ПК есть файл инструкций, тоесть данная програма уже успешно выполнялась            
+	    fin = fs.open(curdir .. listname, "r") -- Пробуем открыть файл
+        if fin ~= nil then -- Если в файлах на ПК есть файл инструкций, тоесть данная программа уже успешно выполнялась            
 			_, _, r = string.find(fin.readLine(), '!Repository="(+)"') -- Читаем первую строку, в которой должно находится имя репозитория
 			_, _, b = string.find(fin.readLine(), '!Branch="(+)"') -- Читаем следующую строку, в которой должна находится ветка
             fin.close()
@@ -33,7 +34,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
     end
 
     local repopath = repo .. "/" .. branch .. "/"
-    local ok, errorMsg, errorMsg, fileNameList = _GET(repopath .. listname)
+    local ok, errorMsg, fileNameList = _GET(repopath .. listname)
 
     if not ok then 
         return (print("repository have no "..listname.." in the repo ".. repo) and false)
@@ -64,9 +65,3 @@ end
 
 local args = {...}
 clone(args[1])
-
-
-
--- TODO Make it module
--- TODO make separate executive script
--- TODO make installation script that install path in autorun
