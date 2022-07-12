@@ -1,4 +1,4 @@
-local instrList_Name = "/Instructions.txt"
+local instrList_Name = "Instructions.txt"
 local defaultFolderName = "CCEnvrm/"
 local prefix = "https://raw.githubusercontent.com/"
 
