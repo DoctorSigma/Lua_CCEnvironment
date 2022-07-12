@@ -1,5 +1,6 @@
 !Repository="DoctorSigma/Lua_CCEnvironment"
 !Branch="master"
+!defaultFolderName="CCEnv"
 
 #!="Instructions.txt"
 #!1="deploy.lua"

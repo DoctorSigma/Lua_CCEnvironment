@@ -1,8 +1,8 @@
 local instrList_Name = "Instructions.txt"
-local defaultFolderName = "CCEnvrm/"
 local prefix = "https://raw.githubusercontent.com/"
 
 
+-- Функция загрузки данных
 function _GET(path) --> status(bool), errorMsg(string), content -- Читает данные с ГитХаба
     local handle = http.get(prefix .. path)
 	
@@ -15,14 +15,16 @@ function _GET(path) --> status(bool), errorMsg(string), content -- Читает 
     return true, nil, content
 end
 
+-- Функция клонирования репозитория
 function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонирует данные с ГитХаба
     local curdir = shell.dir() .. "/"
     if branch == nil then -- Если в параметрах не была указана ветка, то устанавлвается значение по умолчанию, "master"
         branch = "master"
     end
 
-    if repo == nil then -- Если в параметрах не был указан репозиторий
-	    fin = fs.open(curdir .. instrList_Name, "r") -- Пробуем открыть файл
+-- Если в параметрах не был указан репозиторий
+    if repo == nil then 
+	    local fin = fs.open(curdir .. instrList_Name, "r") -- Пробуем открыть файл
         if fin ~= nil then -- Если в файлах на ПК есть файл инструкций, тоесть данная программа уже успешно выполнялась            
 			_, _, r = string.find(fin.readLine(), '!Repository="(.-)"') -- Читаем первую строку, в которой должно находится имя репозитория
 			_, _, b = string.find(fin.readLine(), '!Branch="(.-)"') -- Читаем следующую строку, в которой должна находится ветка
@@ -34,14 +36,24 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
         end
     end
 
+-- Открываем репозиторий
     local repoPath = repo .. "/" .. branch .. "/" -- Путь в репозитории
     local ok, _, instrList_File = _GET(repoPath .. instrList_Name) -- Попытка загрузить файл с инструкциями
 
     if not ok then -- Если не удалось загрузить инструкции
         return (print(' Repository "' .. repo .. '" does not contain the following file: ' .. instrList_Name) and false), (' Repository "' .. repo .. '" does not contain the following file: ' .. instrList_Name)
     end
-	shell.run("rename", defaultFolderName, deleteFolder_ .. defaultFolderName)
-    for fTag, fName in string.gmatch(instrList_File, '#(.-)="(.-)"') do -- Читай с файла инструкций тэг а также название программы с её относительным путём
+
+-- Подготовка к удалению старой папки с файлами
+	local fin = fs.open(curdir .. instrList_Name, "r")
+	local _, _, old_defaultFolderName = string.find(fin, '!defaultFolderName="(.-)"') -- Чтение локального названия папки
+	local _, _, defaultFolderName = string.find(instrList_Name, '!defaultFolderName="(.-)"') -- Чтение нового названия папки
+	fin.close()
+	old_defaultFolderName, defaultFolderName = (old_defaultFolderName .. "/"), (defaultFolderName .. "/") -- Добавления слеша в конец названия
+	shell.run("rename", old_defaultFolderName, "deleteFolder_" .. defaultFolderName) -- Переименовываем старую папку, для последующего удаления
+
+-- Клонирование с нужных файлов с репозитория на ПК
+	for fTag, fName in string.gmatch(instrList_File, '#(.-)="(.-)"') do -- Читай с файла инструкций тэг а также название программы с её относительным путём
 		if (fTag == "!") or (fTag == "Service") then -- Если после ключевого символа "#" есть ("!" или "Service") то это служебные прогаммы и должны быть установлены везде
             print("Receiving: ", fName)
             local ok, _, content = _GET(repoPath .. fName)
@@ -58,14 +70,12 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 			
 		end
     end	
-	shell.run("delete", deleteFolder_ .. defaultFolderName)
+-- Удаление старой папки
+	shell.run("delete", "deleteFolder_" .. defaultFolderName) -- Удаляем старую папку
 	return true, ""
 end
 
-if false then
-local ok, errorMsg, s = _GET("Vany/gh4lua/master/README.md")
-print(s, ok)
-end
 
+-- Непосредственный запуск "распаковки" среды с ГитХаба
 local args = {...}
 clone(args[1])
