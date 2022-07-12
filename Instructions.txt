@@ -1,0 +1,6 @@
+!Repository="DoctorSigma/Lua_CCEnvironment"
+!Branch="master"
+
+#!="startup.lua"
+#Service="Service/goToGPS.lua"
+#User=""
