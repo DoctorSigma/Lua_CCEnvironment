@@ -40,7 +40,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
     if not ok then -- Если не удалось загрузить инструкции
         return (print(' Repository "' .. repo .. '" does not contain the following file: ' .. instrList_Name) and false), (' Repository "' .. repo .. '" does not contain the following file: ' .. instrList_Name)
     end
-	
+	shell.run("rename", defaultFolderName, deleteFolder_ .. defaultFolderName)
     for fTag, fName in string.gmatch(instrList_File, '#(.-)="(.-)"') do -- Читай с файла инструкций тэг а также название программы с её относительным путём
 		if (fTag == "!") or (fTag == "Service") then -- Если после ключевого символа "#" есть ("!" или "Service") то это служебные прогаммы и должны быть установлены везде
             print("Receiving: ", fName)
@@ -57,7 +57,8 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 		else -- Не верно составленый или неизвестный Тэг
 			
 		end
-    end
+    end	
+	shell.run("delete", deleteFolder_ .. defaultFolderName)
 	return true, ""
 end
 
