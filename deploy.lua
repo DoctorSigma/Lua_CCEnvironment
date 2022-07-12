@@ -46,8 +46,8 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 
 -- Подготовка к удалению старой папки с файлами
 	local fin = fs.open(curdir .. instrList_Name, "r")
-	local _, _, old_defaultFolderName = string.find(fin, '!defaultFolderName="(.-)"') -- Чтение локального названия папки
-	local _, _, defaultFolderName = string.find(instrList_Name, '!defaultFolderName="(.-)"') -- Чтение нового названия папки
+	local _, _, old_defaultFolderName = string.find(fin.readAll(), '!defaultFolderName="(.-)"') -- Чтение старого названия папки с ПК
+	local _, _, defaultFolderName = string.find(instrList_Name, '!defaultFolderName="(.-)"') -- Чтение нового названия папки с репозитория
 	fin.close()
 	old_defaultFolderName, defaultFolderName = (old_defaultFolderName .. "/"), (defaultFolderName .. "/") -- Добавления слеша в конец названия
 	shell.run("rename", old_defaultFolderName, "deleteFolder_" .. defaultFolderName) -- Переименовываем старую папку, для последующего удаления
