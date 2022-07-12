@@ -2,6 +2,5 @@
 !Branch="master"
 
 #!="Instructions.txt"
-#!="startup.lua"
-#Service="Service/goToGPS.lua"
-#User=""
+#Service="goToGPS.lua"
+#User="path='HelloWorld', startup='shell.run(NAME)'"
