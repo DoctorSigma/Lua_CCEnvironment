@@ -52,7 +52,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 									  
 -- Подготовка к удалению старой папки с файлами
 	_, _, defaultFolderName = string.find(instrList_File, '!defaultFolderName="(.-)"') -- Чтение нового названия папки с репозитория
-	
+	print(defaultFolderName)
 	if defaultFolderName == nil then -- Если файл на репозитории не содержит "default Folder Name", то завершаем
 		return (print(' File "' .. instrList_Name .. '" does not contain "defaultFolderName"') and false), (' File "' .. instrList_File .. '" does not contain "defaultFolderName"')
 	end
