@@ -21,6 +21,8 @@ end
 function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонирует данные с ГитХаба
     local curdir = shell.dir() .. "/"
 	local compLabel = os.getComputerLabel()
+	local old_defaultFolderName = nil
+	
     if branch == nil then -- Если в параметрах не была указана ветка, то устанавлвается значение по умолчанию, "master"
         branch = "master"
     end
@@ -48,20 +50,26 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
     end                               
 									  
 -- Подготовка к удалению старой папки с файлами
-	local fin = fs.open(curdir .. instrList_Name, "r")
-	local _, _, old_defaultFolderName = string.find(fin.readAll(), '!defaultFolderName="(.-)"') -- Чтение старого названия папки с ПК
-	fin.close()
 	local _, _, defaultFolderName = string.find(instrList_File, '!defaultFolderName="(.-)"') -- Чтение нового названия папки с репозитория
-	defaultFolderName = (defaultFolderName .. "/") -- Добавления слеша в конец названия
+	defaultFolderName = (defaultFolderName .. "/") -- Добавления слеша в конец названия	
 	
-	if old_defaultFolderName ~= nil then -- Если файл существует на ПК, то ...
-		old_defaultFolderName = (old_defaultFolderName .. "/")
-		shell.run("rename", old_defaultFolderName, "deleteFolder_" .. defaultFolderName) -- Переименовываем старую папку, для последующего удаления
+	if defaultFolderName == nil then -- Если файл на репозитории не содержит "default Folder Name", то завершаем
+		return (print(' File "' .. instrList_File .. '" does not contain "default Folder Name"') and false), (' File "' .. instrList_File .. '" does not contain "default Folder Name"')
 	end
+	
+	local fin = fs.open(curdir .. instrList_Name, "r") -- Пробуем открыть локальный файл с инструкциями
+	if fin ~= nil then -- Если файл открылся
+		local _, _, old_defaultFolderName = string.find(fin.readAll(), '!defaultFolderName="(.-)"') -- Чтение старого названия папки с ПК
+		fin.close()
+		if old_defaultFolderName ~= nil then -- Если в файле есть старое название, то ...
+			old_defaultFolderName = (old_defaultFolderName .. "/")
+			shell.run("rename", old_defaultFolderName, "deleteFolder_" .. defaultFolderName) -- Переименовываем старую папку, для последующего удаления
+		end
+	end	
 
 -- Клонирование нужных файлов с репозитория на ПК
 	for fTag, fName in string.gmatch(instrList_File, '#(.-)="(.-)"') do -- Читай с файла инструкций тэг а также название программы с её относительным путём
-		if (fTag == "!") or (fTag == "Service") or (fTag == "File") then -- Если после ключевого символа "#" есть ("!" или "Service") то это служебные прогаммы и должны быть установлены везде
+		if (fTag == "!") or (fTag == "Service") or (fTag == "File") then -- Если после ключевого символа "#" есть ("!" или "Service" или "File") то это служебные прогаммы и должны быть установлены везде
             print("Receiving: ", fName)
             local ok, _, content = _GET(repoPath .. fName)
             if not ok then print(" ..unexisted") else
@@ -81,7 +89,6 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
     end	
 	
 -- Обработка таблицы с пользовательскими программами
-	
 	local temp_k = 1 -- Временная переменная для создания списка, если к-ство програм не поволяет их вывести на экран ПК
 	for k, v in pairs(userProgTable) do -- Вывод списка программ по 10 штук за раз 
 		temp_k = k
