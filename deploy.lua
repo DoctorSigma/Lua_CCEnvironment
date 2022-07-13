@@ -22,6 +22,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
     local curdir = shell.dir() .. "/"
 	local compLabel = os.getComputerLabel()
 	local old_defaultFolderName = nil
+	local defaultFolderName = nil
 	
     if branch == nil then -- Если в параметрах не была указана ветка, то устанавлвается значение по умолчанию, "master"
         branch = "master"
@@ -50,16 +51,17 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
     end                               
 									  
 -- Подготовка к удалению старой папки с файлами
-	local _, _, defaultFolderName = string.find(instrList_File, '!defaultFolderName="(.-)"') -- Чтение нового названия папки с репозитория
-	defaultFolderName = (defaultFolderName .. "/") -- Добавления слеша в конец названия	
+	_, _, defaultFolderName = string.find(instrList_File, '!defaultFolderName="(.-)"') -- Чтение нового названия папки с репозитория
 	
 	if defaultFolderName == nil then -- Если файл на репозитории не содержит "default Folder Name", то завершаем
-		return (print(' File "' .. instrList_File .. '" does not contain "default Folder Name"') and false), (' File "' .. instrList_File .. '" does not contain "default Folder Name"')
+		return (print(' File "' .. instrList_Name .. '" does not contain "defaultFolderName"') and false), (' File "' .. instrList_File .. '" does not contain "defaultFolderName"')
 	end
+	
+	defaultFolderName = (defaultFolderName .. "/") -- Добавления слеша в конец названия	
 	
 	local fin = fs.open(curdir .. instrList_Name, "r") -- Пробуем открыть локальный файл с инструкциями
 	if fin ~= nil then -- Если файл открылся
-		local _, _, old_defaultFolderName = string.find(fin.readAll(), '!defaultFolderName="(.-)"') -- Чтение старого названия папки с ПК
+		_, _, old_defaultFolderName = string.find(fin.readAll(), '!defaultFolderName="(.-)"') -- Чтение старого названия папки с ПК
 		fin.close()
 		if old_defaultFolderName ~= nil then -- Если в файле есть старое название, то ...
 			old_defaultFolderName = (old_defaultFolderName .. "/")
