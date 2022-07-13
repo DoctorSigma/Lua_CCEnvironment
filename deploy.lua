@@ -22,7 +22,6 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
     local curdir = shell.dir() .. "/"
 	local compLabel = os.getComputerLabel()
 	local old_defaultFolderName = nil
-	local defaultFolderName = nil
 	
     if branch == nil then -- Если в параметрах не была указана ветка, то устанавлвается значение по умолчанию, "master"
         branch = "master"
@@ -51,7 +50,8 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
     end                               
 									  
 -- Подготовка к удалению старой папки с файлами
-	_, _, defaultFolderName = string.find(instrList_File, '!defaultFolderName="(.-)"') -- Чтение нового названия папки с репозитория
+	local _, _, defaultFolderName = string.find(instrList_File, '!defaultFolderName="(.-)"') -- Чтение нового названия папки с репозитория
+	print(instrList_File)
 	print(defaultFolderName)
 	if defaultFolderName == nil then -- Если файл на репозитории не содержит "default Folder Name", то завершаем
 		return (print(' File "' .. instrList_Name .. '" does not contain "defaultFolderName"') and false), (' File "' .. instrList_File .. '" does not contain "defaultFolderName"')
