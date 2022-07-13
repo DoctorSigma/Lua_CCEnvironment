@@ -1,4 +1,5 @@
 local instrList_Name = "Instructions.txt"
+local settingsList_Name = "settings.txt"
 local prefix = "https://raw.githubusercontent.com/"
 local userProgTable = {}
 
@@ -19,6 +20,7 @@ end
 -- Функция клонирования репозитория
 function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонирует данные с ГитХаба
     local curdir = shell.dir() .. "/"
+	local compLabel = os.getComputerLabel()
     if branch == nil then -- Если в параметрах не была указана ветка, то устанавлвается значение по умолчанию, "master"
         branch = "master"
     end
@@ -57,9 +59,9 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 		shell.run("rename", old_defaultFolderName, "deleteFolder_" .. defaultFolderName) -- Переименовываем старую папку, для последующего удаления
 	end
 
--- Клонирование с нужных файлов с репозитория на ПК
+-- Клонирование нужных файлов с репозитория на ПК
 	for fTag, fName in string.gmatch(instrList_File, '#(.-)="(.-)"') do -- Читай с файла инструкций тэг а также название программы с её относительным путём
-		if (fTag == "!") or (fTag == "Service") then -- Если после ключевого символа "#" есть ("!" или "Service") то это служебные прогаммы и должны быть установлены везде
+		if (fTag == "!") or (fTag == "Service") or (fTag == "File") then -- Если после ключевого символа "#" есть ("!" или "Service") то это служебные прогаммы и должны быть установлены везде
             print("Receiving: ", fName)
             local ok, _, content = _GET(repoPath .. fName)
             if not ok then print(" ..unexisted") else
@@ -70,14 +72,22 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
                 fout.close()
 			end
 		elseif fTag == "User" then -- Если после ключевого символа "#" есть ("User") то это пользовательские программы, должна быть только одна такая программа на ПК
-			local _, _, fPath = string.find(fName, "path='(.-)'")
-			local _, _, fstartupArgs = string.find(fName, "startupArgs='(.-)'")
-			table.insert(userProgTable, {"path" = fPath, "startupArgs" = fstartupArgs})
-			print(=userProgTable)
+			local _, _, fPath = string.find(fName, "path='(.-)'") -- Узнаем путь куда устанавливать программу
+			local _, _, fstartupArgs = string.find(fName, "startupArgs='(.-)'") -- Узнаем какие аргументы нужно вказывать в файлике с тартапом
+			table.insert(userProgTable, {kPath = fPath, kStartupArgs = fstartupArgs})
 		else -- Не верно составленый или неизвестный Тэг
 			
 		end
     end	
+	
+-- Обработка таблицы с пользовательскими программами
+	
+	local temp_k = 1 -- Временная переменная для создания списка, если к-ство програм не поволяет их вывести на экран ПК
+	for k, v in pairs(userProgTable) do -- Вывод списка программ по 10 штук за раз 
+		temp_k = k
+		textutils.pagedPrint("["..k.."] ".."Name: "..v.kPath) -- Подобно "print()", но если нету места на дисплее, то оно позволит вам увидеть весь список
+	end
+	
 	
 -- Удаление старой папки
 	if old_defaultFolderName ~= nil then shell.run("delete", "deleteFolder_" .. defaultFolderName) end -- Удаляем старую папку, если она существовала

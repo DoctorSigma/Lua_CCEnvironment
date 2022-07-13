@@ -2,7 +2,7 @@
 !Branch="master"
 !defaultFolderName="CCEnv"
 
-#!="Instructions.txt"
 #!1="deploy.lua"
+#File="Instructions.txt"
 #Service="Service/goToGPS.lua"
 #User="path='User/HelloWorld.lua', startupArgs=''"
