@@ -4,7 +4,7 @@ local prefix = "https://raw.githubusercontent.com/"
 
 
 -- Функция загрузки данных
-function _GET(path) --> status(bool), errorMsg(string), content -- Читает данные с ГитХаба
+function _GET(path) --> status(bool), errorMsg(string), content -- Читает данные с GitHub
     local handle = http.get(prefix .. path)
 	
     if (handle == nil) or (handle.getResponseCode() ~= 200) then
@@ -63,18 +63,19 @@ function writeFileandObj(settingTable, curdir, repoPath, defaultFolderName) --> 
 end
 
 -- Функция клонирования репозитория
-function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонирует данные с ГитХаба
+function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонирует данные с GitHub
+	local errorFlag = false
     local curdir = shell.dir() .. "/"
 	local compLabel = os.getComputerLabel()
 	local userProgTable = {}
 	local isUserProg = false
 	local old_defaultFolderName = nil
 	
-    if branch == nil then -- Если в параметрах не была указана ветка, то устанавлвается значение по умолчанию, "master"
+    if branch == nil then -- Если в аргументах не была указана ветка, то устанавливается значение по умолчанию, "master"
         branch = "master"
     end
 
--- Если в параметрах не был указан репозиторий
+-- Если в аргументах не был указан репозиторий
     if repo == nil then 
 	    local fin = fs.open(curdir .. instrList_Name, "r") -- Пробуем открыть файл
         if fin ~= nil then -- Если в файлах на ПК есть файл инструкций, тоесть данная программа уже успешно выполнялась            
@@ -84,6 +85,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
             return clone(r, b)
         else -- Не удалось найти локальный файл предыдущего запуска
             print("Please specify repository in arguments")
+			errorFlag = true
             return false, "No repository name"
         end
     end
@@ -93,12 +95,14 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
     local ok, _, instrList_File = _GET(repoPath .. instrList_Name) -- Попытка загрузить файл с инструкциями
 
     if not ok then -- Если не удалось загрузить инструкции
+		errorFlag = true
         return (print(' Repository "' .. repo .. '" does not contain the following file: ' .. instrList_Name) and false), (' Repository "' .. repo .. '" does not contain the following file: ' .. instrList_Name)
     end                               
 									  
 -- Подготовка к удалению старой папки с файлами
 	local _, _, defaultFolderName = string.find(instrList_File, '!defaultFolderName="(.-)"') -- Чтение нового названия папки с репозитория
 	if defaultFolderName == nil then -- Если файл на репозитории не содержит "default Folder Name", то завершаем
+		errorFlag = true
 		return (print(' File "' .. instrList_Name .. '" does not contain "defaultFolderName"') and false), (' File "' .. instrList_File .. '" does not contain "defaultFolderName"')
 	end
 	
@@ -170,41 +174,73 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 				print("\n  " .. errMsgWrite .. " So select the program from the list below (enter number of programm):\n")
 				for k, v in pairs(userProgTable) do textutils.pagedPrint(" ["..k.."] ".."Name: "..v.kProgName) end -- Подобно "print()", но если нету места на дисплее, то оно позволит вам увидеть весь список
 				
-				local inputValue = -1
+				local inputValue = -2
 				repeat -- Цыкли с после-условием для проверки введеного значения
 					write("\n> ")
 					inputValue = tonumber(read())
 					if inputValue > #userProgTable then print("Too big value, please enter again: ") end
 				until inputValue <= #userProgTable
-				
-				tSettings.S_pinProgramm = userProgTable[inputValue].kProgName
-				tSettings.S_pinPathGit = userProgTable[inputValue].kPath
-				tSettings.S_pinStartArgs = userProgTable[inputValue].kStartupArgs
-				tSettings.S_pinLabel = compLabel				
-				
-				writeStatus, errMsgWrite = writeFileandObj(tSettings, curdir, repoPath, defaultFolderName) -- Запись в файлы
-				if not writeStatus then print(errMsgWrite)
-				else 
-					print('\nProgramm "'..tSettings.S_pinProgramm..'" was connected to "'..tSettings.S_pinLabel..'" label.')
+			
+				if inputValue > 0 then					
+					tSettings.S_pinProgramm = userProgTable[inputValue].kProgName
+					tSettings.S_pinPathGit = userProgTable[inputValue].kPath
+					tSettings.S_pinStartArgs = userProgTable[inputValue].kStartupArgs
+					tSettings.S_pinLabel = compLabel				
+					
+					writeStatus, errMsgWrite = writeFileandObj(tSettings, curdir, repoPath, defaultFolderName) -- Запись в файлы
+					if not writeStatus then print(errMsgWrite) errorFlag = true
+					else 
+						print('\nProgramm "'..tSettings.S_pinProgramm..'" was connected to "'..tSettings.S_pinLabel..'" label.')
+					end
+				elseif inputValue == 0 then -- Если мы не хотим скачивать программы
+					print("No user programm has been downloaded.")
+				elseif inputValue == -1 then -- Если мы хотим скачать все программы, но не привязывать определённую
+					for k, v in pairs(userProgTable) do
+						print("\nReceiving user programm: ", v.kPath)
+						local ok, _, content = _GET(repoPath .. v.kPath)
+						if not ok then print(" ..unexisted") else
+							local fout = fs.open(curdir .. defaultFolderName .. v.kPath, "w")
+							fout.write(content)
+							fout.close()
+						end
+					end
+				else
+			
 				end
 			end
 		else -- Если нет, то делаем новый настроечный файл
-			print("\n--" .. errMsg .. " So select the program you'd like to pin to this PC from the list below (enter number of programm):\n")
+			print("\n--" .. errMsg .. " So select the program you'd like to pin to this PC from the list below (enter number of programm), (if you don't want to attach a custom program, enter 0), (if you want to download all existing custom programs, enter -1):\n")
 			for k, v in pairs(userProgTable) do textutils.pagedPrint(" ["..k.."] ".."Name: "..v.kProgName) end -- Подобно "print()", но если нету места на дисплее, то оно позволит вам увидеть весь список
 			
-			local inputValue = -1
+			local inputValue = -2
 			repeat -- Цыкли с после-условием для проверки введеного значения
 				write("\n> ")
 				inputValue = tonumber(read())
 				if inputValue > #userProgTable then print("Too big value, please enter again: ") end
 			until inputValue <= #userProgTable
 			
-			local content = {S_pinProgramm = userProgTable[inputValue].kProgName, S_pinPathGit = userProgTable[inputValue].kPath, S_pinStartArgs = userProgTable[inputValue].kStartupArgs, S_pinLabel = compLabel} -- Новая таблица с данными, S - значить сервисные данные
+			if inputValue > 0 then
+				local content = {S_pinProgramm = userProgTable[inputValue].kProgName, S_pinPathGit = userProgTable[inputValue].kPath, S_pinStartArgs = userProgTable[inputValue].kStartupArgs, S_pinLabel = compLabel} -- Новая таблица с данными, S - значить сервисные данные
 
-			local writeStatus, errMsgWrite = writeFileandObj(content, curdir, repoPath, defaultFolderName) -- Запись в файлы
-			if not writeStatus then print(errMsgWrite)
-			else 
-				print('\nProgramm "'..content.S_pinProgramm..'" was connected to "'..content.S_pinLabel..'" label.')
+				local writeStatus, errMsgWrite = writeFileandObj(content, curdir, repoPath, defaultFolderName) -- Запись в файлы
+				if not writeStatus then print(errMsgWrite) errorFlag = true
+				else 
+					print('\nProgramm "'..content.S_pinProgramm..'" was connected to "'..content.S_pinLabel..'" label.')
+				end
+			elseif inputValue == 0 then -- Если мы не хотим скачивать программы
+				print("No user programm has been downloaded.")
+			elseif inputValue == -1 then -- Если мы хотим скачать все программы, но не привязывать определённую
+				for k, v in pairs(userProgTable) do
+					print("\nReceiving user programm: ", v.kPath)
+					local ok, _, content = _GET(repoPath .. v.kPath)
+					if not ok then print(" ..unexisted") else
+						local fout = fs.open(curdir .. defaultFolderName .. v.kPath, "w")
+						fout.write(content)
+						fout.close()
+					end
+				end
+			else
+			
 			end
 		end
 	end	
@@ -215,6 +251,6 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 end
 
 
--- Непосредственный запуск "распаковки" среды с ГитХаба
+-- Непосредственный запуск "распаковки" среды с GitHub
 local args = {...}
 clone(args[1])
