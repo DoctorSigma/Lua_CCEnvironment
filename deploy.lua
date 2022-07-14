@@ -194,7 +194,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 					end
 				elseif inputValue == 0 then -- Если мы не хотим скачивать программы
 					print("No user programm has been downloaded.")
-				elseif inputValue == -1 then -- Если мы хотим скачать все программы, но не привязывать определённую
+				elseif inputValue == -1 then -- Если мы хотим скачать все программы, но не хотим привязывать определённую
 					for k, v in pairs(userProgTable) do
 						print("\nReceiving user programm: ", v.kPath)
 						local ok, _, content = _GET(repoPath .. v.kPath)
@@ -229,7 +229,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 				end
 			elseif inputValue == 0 then -- Если мы не хотим скачивать программы
 				print("No user programm has been downloaded.")
-			elseif inputValue == -1 then -- Если мы хотим скачать все программы, но не привязывать определённую
+			elseif inputValue == -1 then -- Если мы хотим скачать все программы, но не хотим привязывать определённую
 				for k, v in pairs(userProgTable) do
 					print("\nReceiving user programm: ", v.kPath)
 					local ok, _, content = _GET(repoPath .. v.kPath)
