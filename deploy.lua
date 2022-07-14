@@ -117,6 +117,14 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 	end	
 
 -- Клонирование нужных файлов с репозитория на ПК
+	if compLabel == nil then -- Если в пк нет метки, то ...
+		write("Your PC does not have a label, please enter it below:\n> ")
+		repeat -- Цыкли с после-условием для проверки введеного значения
+			local compLabel = read()
+			if compLabel == nil then print("Incorrect label name, please enter again: ") end
+		until compLabel ~= nil
+		os.setComputerLabel(compLabel)
+	end
 	for fTag, fName in string.gmatch(instrList_File, '#(.-)="(.-)"') do -- Читай с файла инструкций тэг а также название программы с её относительным путём
 		if (fTag == "!") or (fTag == "Service") or (fTag == "File") then -- Если после ключевого символа "#" есть ("!" или "Service" или "File") то это служебные прогаммы и должны быть установлены везде
             print("Receiving: ", fName)
