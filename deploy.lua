@@ -171,7 +171,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 		if status then -- Если данные серилизировались, то ...		
 			local writeStatus, errMsgWrite = writeFileandObj(tSettings, curdir, repoPath, defaultFolderName) -- Запись в файлы
 			if not writeStatus then -- Если при записи возникли ошибки
-				print("\n  " .. errMsgWrite .. " So select the program from the list below (enter number of programm):\n")
+				print("\n  " .. errMsgWrite .. " So select the program from the list below (enter number of programm):\n -if you don't want to attach a custom program, enter 0:\n -if you want to download all existing custom programs, enter -1:\n")
 				for k, v in pairs(userProgTable) do textutils.pagedPrint(" ["..k.."] ".."Name: "..v.kProgName) end -- Подобно "print()", но если нету места на дисплее, то оно позволит вам увидеть весь список
 				
 				local inputValue = -2
@@ -209,7 +209,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 				end
 			end
 		else -- Если нет, то делаем новый настроечный файл
-			print("\n--" .. errMsg .. " So select the program you'd like to pin to this PC from the list below (enter number of programm), (if you don't want to attach a custom program, enter 0), (if you want to download all existing custom programs, enter -1):\n")
+			print("\n--" .. errMsg .. " So select the program you'd like to pin to this PC from the list below (enter number of programm):\n -if you don't want to attach a custom program, enter 0:\n -if you want to download all existing custom programs, enter -1:\n")
 			for k, v in pairs(userProgTable) do textutils.pagedPrint(" ["..k.."] ".."Name: "..v.kProgName) end -- Подобно "print()", но если нету места на дисплее, то оно позволит вам увидеть весь список
 			
 			local inputValue = -2
