@@ -219,9 +219,9 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 				if inputValue > #userProgTable then print("Too big value, please enter again: ") end
 			until inputValue <= #userProgTable
 			
-			local content = {S_pinProgramm = userProgTable[inputValue].kProgName, S_pinPathGit = userProgTable[inputValue].kPath, S_pinStartArgs = userProgTable[inputValue].kStartupArgs, S_pinLabel = compLabel} -- Новая таблица с данными, S - значить сервисные данные
+			if inputValue > 0 then
+				local content = {S_pinProgramm = userProgTable[inputValue].kProgName, S_pinPathGit = userProgTable[inputValue].kPath, S_pinStartArgs = userProgTable[inputValue].kStartupArgs, S_pinLabel = compLabel} -- Новая таблица с данными, S - значить сервисные данные
 
-			if inputValue > 0 then				
 				local writeStatus, errMsgWrite = writeFileandObj(content, curdir, repoPath, defaultFolderName) -- Запись в файлы
 				if not writeStatus then print(errMsgWrite) errorFlag = true
 				else 
