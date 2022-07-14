@@ -227,7 +227,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 				else 
 					print('\nProgramm "'..content.S_pinProgramm..'" was connected to "'..content.S_pinLabel..'" label.')
 				end
-			elseif inputValue == 0 then -- Если мы не хотим скачивать программы
+			elseif inputValue == 0 then -- Если мы не хотим загружать программы
 				print("No user programm has been downloaded.")
 			elseif inputValue == -1 then -- Если мы хотим скачать все программы, но не хотим привязывать определённую
 				for k, v in pairs(userProgTable) do
