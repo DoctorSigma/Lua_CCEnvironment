@@ -42,7 +42,8 @@ function writeFileandObj(settingTable, curdir, repoPath, defaultFolderName) --> 
 		print(" ..unexisted")
 		return false, 'usetProgError: cannot get file ("'..settingTable.S_pinPathGit..'") from repository.'
 	else
-		if settingTable.S_pinLabel ~= os.getComputerLabel() then return false, "usetProgError: table error in key: S_pinLabel." end -- Если метка пк не совпадает
+		if settingTable.S_pinLabel ~= os.getComputerLabel() then return false, "usetProgError: table error in key: S_pinLabel." -- Если метка пк не совпадает
+		else settingTable.S_pinLabel = os.getComputerLabel() end
 		local fout = fs.open(curdir .. defaultFolderName .. settingTable.S_pinProgramm .. ".lua", "w") -- Записываем файл программы
 		if fout ~= nil then 
 			fout.write(userFile)
@@ -120,7 +121,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 	if compLabel == nil then -- Если в пк нет метки, то ...
 		write("Your PC does not have a label, please enter it below:\n> ")
 		repeat -- Цыкли с после-условием для проверки введеного значения
-			local compLabel = read()
+			compLabel = read()
 			if compLabel == nil then print("Incorrect label name, please enter again: ") end
 		until compLabel ~= nil
 		os.setComputerLabel(compLabel)
