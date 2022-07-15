@@ -4,5 +4,5 @@
 
 #!="deploy.lua"
 #!="Instructions.txt"
-#Service="Service/goToGPS.lua"
+#Service="ServicePrograms.lua"
 #User="path='User/HelloWorld.lua', startupArgs=''"
