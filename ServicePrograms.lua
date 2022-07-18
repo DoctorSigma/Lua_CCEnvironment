@@ -117,4 +117,4 @@ function tFunctionLists.goToGps_Recurse()
 end
 
 
-return tFunctionLists -- Возвращает таблицу, в которой находятся функции.
+return(tFunctionLists) -- Возвращает таблицу, в которой находятся функции.
