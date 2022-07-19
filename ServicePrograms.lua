@@ -79,11 +79,11 @@ function tFunctionLists.goToGps_Recurse()
     dz=math.floor(dz)   --округляем
     
     if dy>0 then                            --если точка выше черепахи, то
-        for i=1,math.abs(dy) do 
+        for _ = 1, math.abs(dy) do
             while not turtle.up() do turtle.digUp() end         --двигатся вверх
         end
     elseif dy<0 then                        --иначе если точка ниже, то
-        for i=1,math.abs(dy) do
+        for i = 1, math.abs(dy) do
             while not turtle.down() do turtle.digDown() end     --двигатся вниз
         end
     end
