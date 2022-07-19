@@ -7,3 +7,4 @@
 #Service="ServicePrograms.lua"
 #User="path='User/HelloWorld.lua', startupArgs=''"
 #User="path='User/TestTurtle.lua', startupArgs=''"
+#User="path='User/TestPC.lua', startupArgs=''"

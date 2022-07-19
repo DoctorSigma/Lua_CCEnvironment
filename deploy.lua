@@ -69,9 +69,10 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 	local compLabel = os.getComputerLabel()
 	local userProgTable = {}
 	local isUserProg = false
-	local old_defaultFolderName = nil
-	
-    if branch == nil then -- Если в аргументах не была указана ветка, то устанавливается значение по умолчанию, "master"
+	---@type string
+	local old_defaultFolderName
+
+	if branch == nil then -- Если в аргументах не была указана ветка, то устанавливается значение по умолчанию, "master"
         branch = "master"
     end
 
@@ -92,9 +93,9 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 
 -- Открываем репозиторий
     local repoPath = repo .. "/" .. branch .. "/" -- Путь в репозитории
-    local ok, _, instrList_File = _GET(repoPath .. instrList_Name) -- Попытка загрузить файл с инструкциями
+    local instrList_ok, _, instrList_File = _GET(repoPath .. instrList_Name) -- Попытка загрузить файл с инструкциями
 
-    if not ok then -- Если не удалось загрузить инструкции
+    if not instrList_ok then -- Если не удалось загрузить инструкции
 		errorFlag = true
         return (print(' Repository "' .. repo .. '" does not contain the following file: ' .. instrList_Name) and false), (' Repository "' .. repo .. '" does not contain the following file: ' .. instrList_Name)
     end                               
@@ -195,7 +196,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 				elseif inputValue == 0 then -- Если мы не хотим скачивать программы
 					print("No user programm has been downloaded.")
 				elseif inputValue == -1 then -- Если мы хотим скачать все программы, но не хотим привязывать определённую
-					for k, v in pairs(userProgTable) do
+					for _, v in pairs(userProgTable) do
 						print("\nReceiving user programm: ", v.kPath)
 						local ok, _, content = _GET(repoPath .. v.kPath)
 						if not ok then print(" ..unexisted") else
@@ -230,7 +231,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 			elseif inputValue == 0 then -- Если мы не хотим загружать программы
 				print("No user programm has been downloaded.")
 			elseif inputValue == -1 then -- Если мы хотим скачать все программы, но не хотим привязывать определённую
-				for k, v in pairs(userProgTable) do
+				for _, v in pairs(userProgTable) do
 					print("\nReceiving user programm: ", v.kPath)
 					local ok, _, content = _GET(repoPath .. v.kPath)
 					if not ok then print(" ..unexisted") else
