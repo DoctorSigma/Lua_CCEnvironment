@@ -1,5 +1,8 @@
 local tFunctionLists = {} -- Таблица в которую будут добавлены функции, чтобы добавить напише TATBLE_NAME.FUNC_NAME() возле имени функции.
 
+function tFunctionLists.TestFunc()
+    print('Test function!! Cucu')
+end
 
 function tFunctionLists.getTurtleDirection() --> status(bool), errorMsg(string), direction(vector) --No change position
 	local i = 1 -- Счётчик цыкла
