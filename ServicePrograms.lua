@@ -12,9 +12,9 @@ function tFunctionLists.getTurtleDirection() --> status(bool), errorMsg(string),
 	while not turtle.forward() do -- Если черепах не смогла двинуться вперёд, то ...
 		if math.fmod(i, 4) == 0 then -- Если мы пробовали пройти вперёд уже 4 раза, то ..
 			i = 1 -- "обнуляем" счётчик
-			if turtle.up() -- Если мы сможем поднятся вверх, то..
+			if turtle.up() then -- Если мы сможем поднятся вверх, то..
 				h = h + 1
-			elseif turtle.down() -- Если мы не смогли поднятся вверх, но можем вниз, то ..
+			elseif turtle.down() then -- Если мы не смогли поднятся вверх, но можем вниз, то ..
 				h = h - 1
 			else -- Мы не смогли никуда повернутся, ошибка
 				return false, "I can't move anywhere!!", nil 
