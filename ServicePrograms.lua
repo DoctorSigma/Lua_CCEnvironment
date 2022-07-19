@@ -83,7 +83,7 @@ function tFunctionLists.goToGps_Recurse()
             while not turtle.up() do turtle.digUp() end         --двигатся вверх
         end
     elseif dy<0 then                        --иначе если точка ниже, то
-        for i = 1, math.abs(dy) do
+        for _ = 1, math.abs(dy) do
             while not turtle.down() do turtle.digDown() end     --двигатся вниз
         end
     end
@@ -97,7 +97,7 @@ function tFunctionLists.goToGps_Recurse()
     end
  
     
-    for n=1, math.abs(dx) do                --двигаемся по оси х
+    for _ =1, math.abs(dx) do                --двигаемся по оси х
         if (turtle.detect()) and not (turtle.detectUp()) and (h<10) then turtle.up() h=h+1 else     --если спереди препятсвие, сверху нет препятсвия и набранная высота<10 то поднятся вверх и h+1
         while not turtle.forward() do turtle.dig()  end end
         
@@ -108,12 +108,12 @@ function tFunctionLists.goToGps_Recurse()
                 (axisX<0) and (dz>0) then turtle.turnLeft()  elseif
                     (axisX<0) and (dz<0) then turtle.turnRight() end
     
-    for n=1,  math.abs(dz) do
+    for _ =1,  math.abs(dz) do
         if (turtle.detect()) and not (turtle.detectUp()) and (h<10) then turtle.up() h=h+1 else
         while not turtle.forward() do turtle.dig() end end
     end 
     
-    for n=1,h do
+    for _ =1,h do
         while not turtle.down() do turtle.digDown() end
     end
     
