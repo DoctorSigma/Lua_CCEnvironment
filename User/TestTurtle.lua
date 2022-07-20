@@ -1,4 +1,3 @@
 local fService = require("ServicePrograms")
-print("TestTurtle.lua start work!")
-print(fService)
-fService.TestFunc()
+local ok, _, vDir = fService.getTurtleDirection()
+print('['..tostring(ok)..'] Direction: '..vDir.tostring())
