@@ -47,7 +47,7 @@ function tFunctionLists.getTurtleDirection() --> status(bool), errorMsg(string),
 -- Возвращаем направление
 	local vDir = vector.new(xRel, 0, zRel) - vector.new(xPos, 0, zPos)
     local vDirNormalize = vDir:normalize()
-    print(vDir, "=----=", vDirNormalize)
+    print(vDir, "=-=", vDirNormalize)
 	return true, "", vDirNormalize
 end
 
