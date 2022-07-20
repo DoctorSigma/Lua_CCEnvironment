@@ -45,8 +45,9 @@ function tFunctionLists.getTurtleDirection() --> status(bool), errorMsg(string),
 	end
 	
 -- Возвращаем направление
-	vDir = vector.new(xRel, 0, zRel) - vector.new(xPos, 0, zPos)
-	return true, "", vDir:normalize()
+	local vDir = vector.new(xRel, 0, zRel) - vector.new(xPos, 0, zPos)
+    local vDirNormalize = vDir:normalize()
+	return true, "", vDirNormalize
 end
 
 function tFunctionLists.goToGps_Recurse()
