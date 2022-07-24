@@ -2,12 +2,13 @@
 local geoPeriphals = peripheral.wrap("right")
 local tArgs = { ... }
 
-print("GeoSearch programm, version: 1.2\n")
+print("GeoSearch programm, version: 1.3\n")
 
 if (#tArgs >= 1) and (geoPeriphals ~= nil) then -- Если в правой руке есть гео-сканер и было введено хотя бы один аргумент
     local vPos = vector.new(gps.locate(1)) --ищем координаты
 
-    local tGeoScanRes = geoPeriphals.scan(tonumber(tArgs[1]))
+    local tGeoScanRes, errorMsg = geoPeriphals.scan(tonumber(tArgs[1]))
+    print(tGeoScanRes, errorMsg)
     if tArgs[2] == nil then tArgs[2] = "minecraft:ancient_debris" end
     for _, v in pairs(tGeoScanRes) do
         if (v.name == tArgs[2]) then --если это второй аргумент, то
