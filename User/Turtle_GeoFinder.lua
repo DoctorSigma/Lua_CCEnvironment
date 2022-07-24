@@ -2,7 +2,7 @@
 local geoPeriphals = peripheral.wrap("right")
 local tArgs = { ... }
 
-print("GeoSearch programm, version: 1.4 \n")
+print("GeoFinder programm, version: 1.4 \n")
 
 if (#tArgs >= 1) and (geoPeriphals ~= nil) then -- Если в правой руке есть гео-сканер и было введено хотя бы один аргумент
     local tGeoScanRes, errorMsg = geoPeriphals.scan(tonumber(tArgs[1]))
