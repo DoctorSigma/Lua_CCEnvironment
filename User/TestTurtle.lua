@@ -1,5 +1,5 @@
 local fService = require("ServicePrograms")
-local geoPeriphals = peripherals.wrap("right")
+local geoPeriphals = peripheral.wrap("right")
 local tArgs = { ... }
 if (#tArgs > 0) and (geoPeriphals ~= nil) then -- Если в правой руке есть гео-сканер и было введено хотя бы один аргумент
     local tGeoScanRes = geoPeriphals.scan(tArgs[1])
