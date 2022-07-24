@@ -254,4 +254,4 @@ end
 
 -- Непосредственный запуск "распаковки" среды с GitHub
 local args = {...}
-clone(args[1])
+clone(args[1], args[2])

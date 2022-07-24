@@ -49,7 +49,7 @@ function tFunctionLists.getTurtleDirection() --> status(bool), errorMsg(string),
 	return true, "", vDir:normalize()
 end
 
-function tFunctionLists.goToGps_Recurse()
+function tFunctionLists.goToGps()
     h=0 --набраная высота
     
     axisX,axisY=0,0                             --поворот по осям х,у
