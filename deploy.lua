@@ -198,6 +198,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 	-- Обработка таблицы с пользовательскими программами, если нужна
 	if not isUserProg then -- Если мы не нашли нужной программы
 		local unserTempPath = ((old_defaultFolderName == nil) and ("") or (old_defaultFolderName)) -- Предпологаемый путь к файлу с настройками
+		--TODO: серилизацию десерилизацию файлов на функцию, которая будет работать через евенты, чтобы обеспечить правильность обробки данных. Функция будет ожидать ивента, и данних которые нужно записати/считать
 		local status, errMsg, tSettings = unerelObj(curdir .. unserTempPath .. settingsList_Name) -- Пробуем десерилизировать данные с файла настройки
 		if status then -- Если данные серилизировались, то ...
 			local writeStatus, errMsgWrite = writeFileandObj(tSettings, curdir, repoPath, defaultFolderName) -- Запись в файлы
@@ -288,4 +289,6 @@ print("#Name: deploy.lua# || #Version: 2.0.4#\n")
 clone(args[1], args[2])
 
 print("Local test function:")
-fReadData("1")
+print("1: ", fReadData("1"))
+print("2: ", fReadData("2"))
+print("3: ", fReadData("3"))
