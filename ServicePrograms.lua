@@ -1,4 +1,5 @@
 local tFunctionLists = {} -- Таблица в которую будут добавлены функции, чтобы добавить напише TATBLE_NAME.FUNC_NAME() возле имени функции.
+--TODO: сделать функцию, которая будет посылать данные в консоль, и откправлять на базу, и на КПК
 
 function tFunctionLists.TestFunc()
     print('Test function!! Cucu')
@@ -8,10 +9,10 @@ function tFunctionLists.getTurtleDirection() --> status(bool), errorMsg(string),
 	local i = 1 -- Счётчик цыкла
 	local h = 0 -- Счётчик относительной высоты
 	
--- Определяем наши координаты
+    -- Определяем наши координаты
 	local xPos, _, zPos = gps.locate(1)
 	if xPos == nil then return false, "I can't find gps!!!(start)", nil end -- Если не смогли определить местоположение
--- Пробуем двигатся вперёд
+    -- Пробуем двигатся вперёд
 	while not turtle.forward() do -- Если черепах не смогла двинуться вперёд, то ...
 		if math.fmod(i, 4) == 0 then -- Если мы пробовали пройти вперёд уже 4 раза, то ..
 			i = 1 -- "обнуляем" счётчик
@@ -28,11 +29,11 @@ function tFunctionLists.getTurtleDirection() --> status(bool), errorMsg(string),
 		end
 	end
 	
--- Определям новое местоположение
+    -- Определям новое местоположение
 	local xRel, _, zRel = gps.locate(1)
 	if xRel == nil then return false, "I can't find gps!!!(final)", nil end -- Если не смогли определить местоположение
 	
--- "Обнуляем" набраную позицию
+    -- "Обнуляем" набраную позицию
 	if not turtle.back() then return false, "I can't move back!!", nil end -- Возвращаемся назад, так как двигались вперёд
 	while h ~= 0 do -- Если мы двигались по вертикале, то пробуем обнулить набраную высоту
 		if h < 0 then 
@@ -44,7 +45,7 @@ function tFunctionLists.getTurtleDirection() --> status(bool), errorMsg(string),
 		end
 	end
 	
--- Возвращаем направление
+    -- Возвращаем направление
 	local vDir = vector.new(xRel, 0, zRel) - vector.new(xPos, 0, zPos)
 	return true, "", vDir:normalize()
 end

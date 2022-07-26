@@ -2,6 +2,7 @@ local instrList_Name = "Instructions.txt"
 local settingsList_Name = "settings.txt"
 local prefix = "https://raw.githubusercontent.com/"
 
+--TODO: Заметка: local modem = peripheral.find("modem") or error("No modem attached", 0)
 
 -- Функция загрузки данных
 function _GET(path) --> status(bool), errorMsg(string), content -- Читает данные с GitHub
@@ -14,6 +15,27 @@ function _GET(path) --> status(bool), errorMsg(string), content -- Читает 
     local content = handle.readAll()
     handle.close()
     return true, nil, content
+end
+
+--Функция считывание данных с клавиатуры за n секунд, или возвращения значение по умолчанию
+function fReadData(defaultValue) --> status(bool), errorMsg(string), content(string)
+	local expect = require "cc.expect"
+	expect.expect(1, defaultValue, "string", "nil")
+
+	local nTimerId = os.startTimer(3)--запускаем таймер на 3 секунды и сохраняем его ИД
+	while true do
+		local sEventName, eventArgs = os.pullEvent()
+		if ((sEventName == "timer") and (eventArgs == nTimerId) and (defaultValue ~= nil)) then -- Если таймер уже вышел и есть значение по умолчанию
+			return true, "", defaultValue
+		elseif ((sEventName == "char") and (eventArgs == ' ') and (defaultValue ~= nil)) then -- Или мы нажали на пробел и есть значение по умолчанию
+			return true, "", defaultValue
+		elseif ((sEventName == "char") and (eventArgs ~= ' ')) then -- Или ввели что-то другое
+			local res = read()
+			return true, "", (eventArgs .. res)
+		else
+			return false, "Unknown error", nil
+		end
+	end
 end
 
 -- Функция десерилизации данных
@@ -76,7 +98,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
         branch = "master"
     end
 
--- Если в аргументах не был указан репозиторий
+	-- Если в аргументах не был указан репозиторий
     if repo == nil then 
 	    local fin = fs.open(curdir .. instrList_Name, "r") -- Пробуем открыть файл
         if fin ~= nil then -- Если в файлах на ПК есть файл инструкций, тоесть данная программа уже успешно выполнялась            
@@ -91,7 +113,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
         end
     end
 
--- Открываем репозиторий
+	-- Открываем репозиторий
     local repoPath = repo .. "/" .. branch .. "/" -- Путь в репозитории
     local instrList_ok, _, instrList_File = _GET(repoPath .. instrList_Name) -- Попытка загрузить файл с инструкциями
 
@@ -100,7 +122,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
         return (print(' Repository "' .. repo .. '" does not contain the following file: ' .. instrList_Name) and false), (' Repository "' .. repo .. '" does not contain the following file: ' .. instrList_Name)
     end                               
 									  
--- Подготовка к удалению старой папки с файлами
+	-- Подготовка к удалению старой папки с файлами
 	local _, _, defaultFolderName = string.find(instrList_File, '!defaultFolderName="(.-)"') -- Чтение нового названия папки с репозитория
 	if defaultFolderName == nil then -- Если файл на репозитории не содержит "default Folder Name", то завершаем
 		errorFlag = true
@@ -118,22 +140,27 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 			shell.run("rename", old_defaultFolderName, "deleteFolder_" .. old_defaultFolderName) -- Переименовываем старую папку, для последующего удаления
 			old_defaultFolderName = "deleteFolder_" .. old_defaultFolderName -- Присваиваем переменной название старой переименованой папки
 		else
-			old_defaultFolderName = nil -- Для того чтобы когда в файле есть название папка, а самой папки не было, то чтобы программа не пыталась удалить не существующую папку
+			old_defaultFolderName = nil -- Для того, чтобы когда в файле есть название папка, а самой папки не было, то чтобы программа не пыталась удалить не существующую папку
 		end
-	end	
+	end
 
--- Клонирование нужных файлов с репозитория на ПК
+	-- Назначение метки для ПК, если нужно
 	if compLabel == nil then -- Если в пк нет метки, то ...
 		write("Your PC does not have a label, please enter it below:\n> ")
 		repeat -- Цыкли с после-условием для проверки введеного значения
-			compLabel = read()
+			compLabel = fReadData()
 			if compLabel == nil then print("Incorrect label name, please enter again: ") end
 		until compLabel ~= nil
 		os.setComputerLabel(compLabel)
+	else --Предложение сменить метку
+		--TODO: написать функцию для условного считывания данных с пк: если пользователь ничего не вводит 5 секунд, или вводит останавливемый символ, то берётся значение по умолчанию
 	end
-	for fTag, fName in string.gmatch(instrList_File, '#(.-)="(.-)"') do -- Читай с файла инструкций тэг а также название программы с её относительным путём
+
+	-- Клонирование нужных файлов с репозитория на ПК
+	for fTag, fName in string.gmatch(instrList_File, '#(.-)="(.-)"') do -- Читай и испольняем некоторые с файла инструкции
 		if (fTag == "!") or (fTag == "Service") or (fTag == "File") then -- Если после ключевого символа "#" есть ("!" или "Service" или "File") то это служебные прогаммы и должны быть установлены везде
-            print("Receiving: ", fName)
+			--TODO: использовать функцию, которая будет посылать данные в консоль, и откправлять на базу, и на КПК
+			print("Receiving: ", fName)
             local ok, _, content = _GET(repoPath .. fName)
             if not ok then print(" ..unexisted") else
 				local instalDir = ((fTag == "!") and ("") or (defaultFolderName)) -- "Тернарный оператор", конструктция:(s = condition ? "true" : "false"), пояснение: оператор "and" возвращает первое ложное значение среди сових операндов; если оба операнда истинны, возвращается последний из них, а оператор "or" возвращает первое истинное значение среди своих операндов; если оба операнда ложны, возвращается последний из них
@@ -142,12 +169,13 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
                 fout.write(content)
                 fout.close()
 			end
-		elseif fTag == "User" then -- Если после ключевого символа "#" есть ("User") то это пользовательские программы, должна быть только одна такая программа на ПК
+		elseif fTag == "User" then -- Если после ключевого символа "#" есть ("User") то это пользовательские программы, тоисть
 			if not isUserProg then -- Нет установленой пользовательской программы
-				local _, _, fPath = string.find(fName, "path='(.-)'") -- Узнаем путь куда устанавливать программу
-				local _, _, fstartupArgs = string.find(fName, "startupArgs='(.-)'") -- Узнаем какие аргументы нужно вказывать в файлике с тартапом
-				local _, _, progName = string.find(fPath, '/(.-).lua') -- Извлекаем название программы
+				local _, _, fPath = string.find(fName, "sPath='(.-)'") -- Узнаем путь куда устанавливать программу
+				local _, _, fstartupArgs = string.find(fName, "sStartupArgs='(.-)'") -- Узнаем какие аргументы нужно вказывать в файлике с тартапом
+				local _, _, progName = string.find(fPath, "sPath='[.-]/(.-).lua'") -- Извлекаем название программы
 				table.insert(userProgTable, {kProgName = progName, kPath = fPath, kStartupArgs = fstartupArgs})
+
 				if progName == compLabel then -- Если есть приложение с таким же названием как и пк, то ..
 					print("\nReceiving user programm: ", fPath)
 					local ok, _, content = _GET(repoPath .. fPath)
@@ -159,38 +187,39 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 					isUserProg = true -- Делаем пометку, что программу найдено
 					userProgTable = {} -- Удаляем ненужную уже таблицу
 				end
+
 			end
 		else -- Не верно составленый или неизвестный Тэг
-			
+
 		end
-    end	
-	
--- Обработка таблицы с пользовательскими программами, если нужна
-	if not isUserProg then -- Если мы не нашли нужной программы	
+    end
+
+	-- Обработка таблицы с пользовательскими программами, если нужна
+	if not isUserProg then -- Если мы не нашли нужной программы
 		local unserTempPath = ((old_defaultFolderName == nil) and ("") or (old_defaultFolderName)) -- Предпологаемый путь к файлу с настройками
 		local status, errMsg, tSettings = unerelObj(curdir .. unserTempPath .. settingsList_Name) -- Пробуем десерилизировать данные с файла настройки
-		if status then -- Если данные серилизировались, то ...		
+		if status then -- Если данные серилизировались, то ...
 			local writeStatus, errMsgWrite = writeFileandObj(tSettings, curdir, repoPath, defaultFolderName) -- Запись в файлы
 			if not writeStatus then -- Если при записи возникли ошибки
 				print("\n  " .. errMsgWrite .. " So select the program from the list below (enter number of programm):\n -if you don't want to attach a custom program, enter 0:\n -if you want to download all existing custom programs, enter -1:\n")
 				for k, v in pairs(userProgTable) do textutils.pagedPrint(" ["..k.."] ".."Name: "..v.kProgName) end -- Подобно "print()", но если нету места на дисплее, то оно позволит вам увидеть весь список
-				
+
 				local inputValue = -2
 				repeat -- Цыкли с после-условием для проверки введеного значения
 					write("\n> ")
-					inputValue = tonumber(read())
+					inputValue = tonumber(fReadData("0"))
 					if inputValue > #userProgTable then print("Too big value, please enter again: ") end
 				until inputValue <= #userProgTable
-			
-				if inputValue > 0 then					
+
+				if inputValue > 0 then
 					tSettings.S_pinProgramm = userProgTable[inputValue].kProgName
 					tSettings.S_pinPathGit = userProgTable[inputValue].kPath
 					tSettings.S_pinStartArgs = userProgTable[inputValue].kStartupArgs
-					tSettings.S_pinLabel = compLabel				
-					
+					tSettings.S_pinLabel = compLabel
+
 					writeStatus, errMsgWrite = writeFileandObj(tSettings, curdir, repoPath, defaultFolderName) -- Запись в файлы
 					if not writeStatus then print(errMsgWrite) errorFlag = true
-					else 
+					else
 						print('\nProgramm "'..tSettings.S_pinProgramm..'" was connected to "'..tSettings.S_pinLabel..'" label.')
 					end
 				elseif inputValue == 0 then -- Если мы не хотим скачивать программы
@@ -206,26 +235,26 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 						end
 					end
 				else
-			
+
 				end
 			end
 		else -- Если нет, то делаем новый настроечный файл
 			print("\n--" .. errMsg .. " So select the program you'd like to pin to this PC from the list below (enter number of programm):\n -if you don't want to attach a custom program, enter 0:\n -if you want to download all existing custom programs, enter -1:\n")
 			for k, v in pairs(userProgTable) do textutils.pagedPrint(" ["..k.."] ".."Name: "..v.kProgName) end -- Подобно "print()", но если нету места на дисплее, то оно позволит вам увидеть весь список
-			
+
 			local inputValue = -2
 			repeat -- Цыкли с после-условием для проверки введеного значения
 				write("\n> ")
-				inputValue = tonumber(read())
+				inputValue = tonumber(fReadData("0"))
 				if inputValue > #userProgTable then print("Too big value, please enter again: ") end
 			until inputValue <= #userProgTable
-			
+
 			if inputValue > 0 then
 				local content = {S_pinProgramm = userProgTable[inputValue].kProgName, S_pinPathGit = userProgTable[inputValue].kPath, S_pinStartArgs = userProgTable[inputValue].kStartupArgs, S_pinLabel = compLabel} -- Новая таблица с данными, S - значить сервисные данные
 
 				local writeStatus, errMsgWrite = writeFileandObj(content, curdir, repoPath, defaultFolderName) -- Запись в файлы
 				if not writeStatus then print(errMsgWrite) errorFlag = true
-				else 
+				else
 					print('\nProgramm "'..content.S_pinProgramm..'" was connected to "'..content.S_pinLabel..'" label.')
 				end
 			elseif inputValue == 0 then -- Если мы не хотим загружать программы
@@ -241,11 +270,11 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 					end
 				end
 			else
-			
+
 			end
 		end
-	end	
-	
+	end
+
 -- Удаление старой папки
 	if old_defaultFolderName ~= nil then shell.run("delete", old_defaultFolderName) end -- Удаляем старую папку, если она существовала
 	return true, ""
@@ -254,4 +283,5 @@ end
 
 -- Непосредственный запуск "распаковки" среды с GitHub
 local args = {...}
+print("#Name: deploy.lua# || #Version: 2.0.1#\n")
 clone(args[1], args[2])
