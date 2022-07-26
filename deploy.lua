@@ -137,6 +137,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 		fin.close()
 		if ((old_defaultFolderName ~= nil) and (fs.exists(old_defaultFolderName .. "/"))) then -- Если в файле есть старое название и папка существует, то ...
 			old_defaultFolderName = (old_defaultFolderName .. "/")
+			if fs.exists("deleteFolder_" .. old_defaultFolderName) then shell.run("delete", "deleteFolder_" .. old_defaultFolderName) end
 			shell.run("rename", old_defaultFolderName, "deleteFolder_" .. old_defaultFolderName) -- Переименовываем старую папку, для последующего удаления
 			old_defaultFolderName = "deleteFolder_" .. old_defaultFolderName -- Присваиваем переменной название старой переименованой папки
 		else
@@ -283,5 +284,5 @@ end
 
 -- Непосредственный запуск "распаковки" среды с GitHub
 local args = {...}
-print("#Name: deploy.lua# || #Version: 2.0.2#\n")
+print("#Name: deploy.lua# || #Version: 2.0.3#\n")
 clone(args[1], args[2])
