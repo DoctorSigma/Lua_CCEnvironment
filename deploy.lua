@@ -174,7 +174,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 			if not isUserProg then -- Нет установленой пользовательской программы
 				local _, _, fPath = string.find(fName, "sPath='(.-)'") -- Узнаем путь куда устанавливать программу
 				local _, _, fstartupArgs = string.find(fName, "sStartupArgs='(.-)'") -- Узнаем какие аргументы нужно вказывать в файлике с тартапом
-				local _, _, progName = string.find(fPath, "sPath='[.+]/(.-).lua'") -- Извлекаем название программы
+				local _, _, progName = string.find(fPath, "sPath='.+/(.-).lua'") -- Извлекаем название программы
 				table.insert(userProgTable, {kProgName = progName, kPath = fPath, kStartupArgs = fstartupArgs})
 
 				if progName == compLabel then -- Если есть приложение с таким же названием как и пк, то ..
@@ -284,5 +284,8 @@ end
 
 -- Непосредственный запуск "распаковки" среды с GitHub
 local args = {...}
-print("#Name: deploy.lua# || #Version: 2.0.3#\n")
+print("#Name: deploy.lua# || #Version: 2.0.3.1#\n")
 clone(args[1], args[2])
+
+print("Local test function:")
+fReadData(1)
