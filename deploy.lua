@@ -30,10 +30,7 @@ function fReadData(defaultValue) --> status(bool), errorMsg(string), content(str
 		elseif ((sEventName == "char") and (eventArgs == ' ') and (defaultValue ~= nil)) then -- Или мы нажали на пробел и есть значение по умолчанию
 			return true, "", defaultValue
 		elseif ((sEventName == "char") and (eventArgs ~= ' ')) then -- Или ввели что-то другое
-			local res = read()
-			return true, "", (eventArgs .. res)
---		else
---			return false, "Unknown error", nil
+			return true, "", read()
 		end
 	end
 end
@@ -285,7 +282,7 @@ end
 
 -- Непосредственный запуск "распаковки" среды с GitHub
 local args = {...}
-print("#Name: deploy.lua# || #Version: 2.0.4.2#\n")
+print("#Name: deploy.lua# || #Version: 2.0.4.3#\n")
 clone(args[1], args[2])
 
 print("Local test function:")
