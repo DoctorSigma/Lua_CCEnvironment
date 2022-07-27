@@ -30,6 +30,7 @@ function fReadData(defaultValue) --> status(bool), errorMsg(string), content(str
 		elseif ((sEventName == "char") and (eventArgs == ' ') and (defaultValue ~= nil)) then -- Или мы нажали на пробел и есть значение по умолчанию
 			return true, "", defaultValue
 		elseif ((sEventName == "char") and (eventArgs ~= ' ')) then -- Или ввели что-то другое
+			write(">")
 			return true, "", read(_, {}, {}, eventArgs)
 		end
 	end
