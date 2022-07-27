@@ -1,10 +1,31 @@
 local tFunctionLists = {} -- Таблица в которую будут добавлены функции, чтобы добавить напише TATBLE_NAME.FUNC_NAME() возле имени функции.
 --TODO: сделать функцию, которая будет посылать данные в консоль, и откправлять на базу, и на КПК
+print("File: ServicePrograms v1")
+--Функция
+function tFunctionLists.fTest() --> status(bool), errorMsg(string), content(string)
 
-function tFunctionLists.TestFunc()
-    print('Test function!! Cucu')
 end
 
+--Функция считывание данных с клавиатуры за n секунд, или возвращения значение по умолчанию
+function tFunctionLists.fReadData(defaultValue) --> status(bool), errorMsg(string), content(string)
+    local expect = require "cc.expect"
+    expect.expect(1, defaultValue, "string", "nil")
+
+    local nTimerId = os.startTimer(3)--запускаем таймер на 3 секунды и сохраняем его ИД
+    while true do
+        local sEventName, eventArgs = os.pullEvent()
+        if ((sEventName == "timer") and (eventArgs == nTimerId) and (defaultValue ~= nil)) then -- Если таймер уже вышел и есть значение по умолчанию
+            return true, "", defaultValue
+        elseif ((sEventName == "char") and (eventArgs == ' ') and (defaultValue ~= nil)) then -- Или мы нажали на пробел и есть значение по умолчанию
+            return true, "", defaultValue
+        elseif ((sEventName == "char") and (eventArgs ~= ' ')) then -- Или ввели что-то другое
+            write(">")
+            return true, "", read(nil, nil, nil, eventArgs)
+        end
+    end
+end
+
+-- Функция получения напрвления для черепахи
 function tFunctionLists.getTurtleDirection() --> status(bool), errorMsg(string), direction(vector) --No change position
 	local i = 1 -- Счётчик цыкла
 	local h = 0 -- Счётчик относительной высоты
@@ -50,6 +71,7 @@ function tFunctionLists.getTurtleDirection() --> status(bool), errorMsg(string),
 	return true, "", vDir:normalize()
 end
 
+-- Функция поиска пути к определенным координатам
 function tFunctionLists.goToGps()
     h=0 --набраная высота
     
