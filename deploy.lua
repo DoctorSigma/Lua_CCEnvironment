@@ -31,7 +31,7 @@ function fReadData(defaultValue) --> status(bool), errorMsg(string), content(str
 			return true, "", defaultValue
 		elseif ((sEventName == "char") and (eventArgs ~= ' ')) then -- Или ввели что-то другое
 			write(">")
-			return true, "", read(_, {}, {}, eventArgs)
+			return true, "", read(nil, nil, nil, eventArgs)
 		end
 	end
 end
@@ -283,7 +283,7 @@ end
 
 -- Непосредственный запуск "распаковки" среды с GitHub
 local args = {...}
-print("#Name: deploy.lua# || #Version: 2.0.4.4#\n")
+print("#Name: deploy.lua# || #Version: 2.0.4.5#\n")
 clone(args[1], args[2])
 
 print("Local test function:")
