@@ -1,5 +1,5 @@
 local fService = require("ServicePrograms")
-print("TestPC test 1.1:")
+print("TestPC test 1.2:")
 
 local function test()
     fService.getSettings("value1")

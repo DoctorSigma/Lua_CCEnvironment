@@ -285,10 +285,3 @@ end
 local args = {...}
 print("#Name: deploy.lua# || #Version: 2.0.4.5#\n")
 clone(args[1], args[2])
-
-print("Local test function:")
-sleep(1)
-print("Now:")
-print("1: ", fReadData("1"))
-print("2: ", fReadData("2"))
-print("3: ", fReadData("3"))

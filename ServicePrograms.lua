@@ -59,7 +59,7 @@ end
 --Функция получения указаной настройки за указаное время (по умолчанию 5 секунд)
 function tFunctionLists.getSettings(sTableLabel, nDefaultTime) --> operResContent(string), errorMsg(string)
     expect.expect(1, sTableLabel, "string")
-    expect.expect(2, nDefaultTime, "number")
+    expect.expect(2, nDefaultTime, "number", "nil")
     if nDefaultTime <= 0 then return nil, "not correct timer time" end -- Если значение для таймера неверное
     if nDefaultTime == nil then nDefaultTime = 5 end -- Если пользователь не указал максимальное время, то оно равно значению по умолчанию
     local nRequestId = os.startTimer(nDefaultTime) -- Запускаем таймер, который будет служить ID, и непосредственно таймером
@@ -81,7 +81,7 @@ end
 function tFunctionLists.setSettings(sTableLabel, sTableValue, nDefaultTime) --> operStatus(boolean), nil | errorMsg(string)
     expect.expect(1, sTableLabel, "string")
     expect.expect(2, sTableValue, "string")
-    expect.expect(3, nDefaultTime, "number")
+    expect.expect(3, nDefaultTime, "number", "nil")
     if nDefaultTime <= 0 then return false, "not correct timer time" end -- Если значение для таймера неверное
     if nDefaultTime == nil then nDefaultTime = 5 end -- Если пользователь не указал максимальное время, то оно равно значению по умолчанию
     local nRequestId = os.startTimer(nDefaultTime) -- Запускаем таймер, который будет служить ID, и непосредственно таймером
