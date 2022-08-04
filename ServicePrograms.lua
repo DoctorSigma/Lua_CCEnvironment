@@ -1,14 +1,106 @@
-local tFunctionLists = {} -- Таблица в которую будут добавлены функции, чтобы добавить напише TATBLE_NAME.FUNC_NAME() возле имени функции.
---TODO: сделать функцию, которая будет посылать данные в консоль, и откправлять на базу, и на КПК
-print("File: ServicePrograms v1")
---Функция
-function tFunctionLists.fTest() --> status(bool), errorMsg(string), content(string)
+--- ServicePrograms
+--- Version: 2.1.1
 
+local tFunctionLists = {} -- Таблица в которую будут добавлены функции, чтобы добавить напише TABLE_NAME.FUNC_NAME() возле имени функции.
+local expect = require "cc.expect"
+
+--TODO: сделать функцию, которая будет посылать данные в консоль, и отправлять на базу, и на КПК
+
+--Функция драйвера настроек, которая последовательно будет исполнять команды
+function tFunctionLists.fSettingsDriver() --> content(string) | nil, nil | errorMsg(string)
+    local tSettingTable = {}
+    local curdir = shell.dir() .. "/"
+    local settingsList_Name = "settings.txt"
+
+    -- Считывание предыдущих сохраненных настроек
+    local fin, _ = fs.open(curdir .. settingsList_Name, "r") -- Пробуем открыть файл c настройками
+    if fin ~= nil then -- если файл открылся
+        local sContent = fin.readAll() -- Читаем таблицу с файла
+        fin.close()
+        if sContent ~= nil then -- если что-то есть в файле
+            tSettingTable = textutils.unserialize(sContent) -- Пробуем десирилизировать вместимое файла
+            if tSettingTable == nil then tSettingTable = {} end --если мы смогли десирилизировать данные с файла
+        end
+    end
+
+    -- Последовательная обработка команд
+    while true do
+        local _, nRecvId, eventCommand, eventTableId, eventArgs = os.pullEvent("settings_driver_in")
+        if ((eventCommand == "get")) then -- Если нужно считать данные
+            if tSettingTable[eventTableId] ~= nil then -- Если есть такое поле и там есть значение
+                os.queueEvent("settings_driver_out", nRecvId, tSettingTable[eventTableId], "")
+            else
+                os.queueEvent("settings_driver_out", nRecvId, nil, "no field")
+            end
+        elseif ((eventCommand == "set")) then -- Или нужно установить данные
+            tSettingTable[eventTableId] = eventArgs
+            local bErrorFlag = false
+            local fout, _ = fs.open(curdir .. "temp" .. settingsList_Name, "w") -- Пробуем открыть файл c настройками
+            if fout ~= nil then --Если файл открылся
+                local seriObj = textutils.serialize(tSettingTable)
+                if seriObj ~= nil then
+                    fout.write(seriObj)
+                    fout.close()
+                    shell.run("delete", curdir .. settingsList_Name)
+                    if shell.run("rename", curdir .. "temp" .. settingsList_Name, curdir .. settingsList_Name) then bErrorFlag = true end
+                else
+                    fout.close()
+                end
+            end
+            os.queueEvent("settings_driver_out", nRecvId, bErrorFlag, "save error")
+        elseif ((eventCommand == "stop")) then -- Или команда "стоп"
+            return true, 'Command: "stop"'
+        end
+    end
+
+    return false, 'Error: EoF'
+end
+
+--Функция получения указаной настройки за указаное время (по умолчанию 5 секунд)
+function tFunctionLists.getSettings(sTableLabel, nDefaultTime) --> operResContent(string), errorMsg(string)
+    expect.expect(1, sTableLabel, "string")
+    expect.expect(2, nDefaultTime, "number")
+    if nDefaultTime <= 0 then return nil, "not correct timer time" end -- Если значение для таймера неверное
+    if nDefaultTime == nil then nDefaultTime = 5 end -- Если пользователь не указал максимальное время, то оно равно значению по умолчанию
+    local nRequestId = os.startTimer(nDefaultTime) -- Запускаем таймер, который будет служить ID, и непосредственно таймером
+
+    --Отдача команды и ожидание ответа
+    os.queueEvent("settings_driver_in", nRequestId, "get", sTableLabel)
+    while true do
+        local sEventName, nEventID, sOperContent, sOperErr = os.pullEvent()
+        if ((sEventName == "timer") and (nEventID == nRequestId)) then -- Если таймер уже вышел
+            return nil, "Timer out (get)"
+        elseif ((sEventName == "settings_driver_out") and (nEventID == nRequestId)) then -- Или мы получили ответ
+            return sOperContent, sOperErr
+        end
+    end
+    return nil, 'Error: EoF'
+end
+
+--Функция установки указаной настройки за указаное время (по умолчанию 5 секунд)
+function tFunctionLists.setSettings(sTableLabel, sTableValue, nDefaultTime) --> operStatus(boolean), nil | errorMsg(string)
+    expect.expect(1, sTableLabel, "string")
+    expect.expect(2, sTableValue, "string")
+    expect.expect(3, nDefaultTime, "number")
+    if nDefaultTime <= 0 then return false, "not correct timer time" end -- Если значение для таймера неверное
+    if nDefaultTime == nil then nDefaultTime = 5 end -- Если пользователь не указал максимальное время, то оно равно значению по умолчанию
+    local nRequestId = os.startTimer(nDefaultTime) -- Запускаем таймер, который будет служить ID, и непосредственно таймером
+
+    --Отдача команды и ожидание ответа
+    os.queueEvent("settings_driver_in", nRequestId, "set", sTableLabel, sTableValue)
+    while true do
+        local sEventName, nEventID, sOperContent, sOperErr = os.pullEvent()
+        if ((sEventName == "timer") and (nEventID == nRequestId)) then -- Если таймер уже вышел
+            return false, "Timer out (set)"
+        elseif ((sEventName == "settings_driver_out") and (nEventID == nRequestId)) then -- Или мы получили ответ
+            return sOperContent, sOperErr
+        end
+    end
+    return false, 'Error: EoF'
 end
 
 --Функция считывание данных с клавиатуры за n секунд, или возвращения значение по умолчанию
 function tFunctionLists.fReadData(defaultValue) --> status(bool), errorMsg(string), content(string)
-    local expect = require "cc.expect"
     expect.expect(1, defaultValue, "string", "nil")
 
     local nTimerId = os.startTimer(3)--запускаем таймер на 3 секунды и сохраняем его ИД
