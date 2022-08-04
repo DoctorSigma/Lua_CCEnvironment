@@ -1,19 +1,19 @@
 --- ServicePrograms
---- Version: 2.1.2
+--- Version: 2.1.3
 
 local tFunctionLists = {} -- Таблица в которую будут добавлены функции, чтобы добавить напише TABLE_NAME.FUNC_NAME() возле имени функции.
 local expect = require "cc.expect"
+local defaultFolderName = "CCEnv/"
 
 --TODO: сделать функцию, которая будет посылать данные в консоль, и отправлять на базу, и на КПК
 
 --Функция драйвера настроек, которая последовательно будет исполнять команды
 function tFunctionLists.fSettingsDriver() --> content(string) | nil, nil | errorMsg(string)
     local tSettingTable = {}
-    local curdir = shell.dir() .. "/"
     local settingsList_Name = "settings.txt"
 
     -- Считывание предыдущих сохраненных настроек
-    local fin, _ = fs.open(curdir .. settingsList_Name, "r") -- Пробуем открыть файл c настройками
+    local fin, _ = fs.open(defaultFolderName .. settingsList_Name, "r") -- Пробуем открыть файл c настройками
     if fin ~= nil then -- если файл открылся
         local sContent = fin.readAll() -- Читаем таблицу с файла
         fin.close()
@@ -35,16 +35,16 @@ function tFunctionLists.fSettingsDriver() --> content(string) | nil, nil | error
         elseif ((eventCommand == "set")) then -- Или нужно установить данные
             tSettingTable[eventTableId] = eventArgs
             local bErrorFlag = false
-            local fout, _ = fs.open(curdir .. "temp" .. settingsList_Name, "w") -- Пробуем открыть файл c настройками
+            local fout, _ = fs.open(defaultFolderName .. "temp" .. settingsList_Name, "w") -- Пробуем открыть файл c настройками
             if fout ~= nil then --Если файл открылся
                 local seriObj = textutils.serialize(tSettingTable)
                 if seriObj ~= nil then
                     fout.write(seriObj)
                     fout.close()
                     print(1)
-                    shell.run("delete", curdir .. settingsList_Name)
+                    shell.run("delete", defaultFolderName .. settingsList_Name)
                     print(1)
-                    if shell.run("rename", curdir .. "temp" .. settingsList_Name, curdir .. settingsList_Name) then bErrorFlag = true end
+                    if shell.run("rename", defaultFolderName .. "temp" .. settingsList_Name, defaultFolderName .. settingsList_Name) then bErrorFlag = true end
                 else
                     fout.close()
                 end
