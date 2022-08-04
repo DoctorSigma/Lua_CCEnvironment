@@ -41,9 +41,7 @@ function tFunctionLists.fSettingsDriver() --> content(string) | nil, nil | error
                 if seriObj ~= nil then
                     fout.write(seriObj)
                     fout.close()
-                    print(1)
                     shell.run("delete", defaultFolderName .. settingsList_Name)
-                    print(1)
                     if shell.run("rename", defaultFolderName .. "temp" .. settingsList_Name, defaultFolderName .. settingsList_Name) then bErrorFlag = true end
                 else
                     fout.close()
