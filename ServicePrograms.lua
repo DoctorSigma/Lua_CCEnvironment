@@ -1,5 +1,5 @@
 --- ServicePrograms
---- Version: 2.1.1
+--- Version: 2.1.2
 
 local tFunctionLists = {} -- Таблица в которую будут добавлены функции, чтобы добавить напише TABLE_NAME.FUNC_NAME() возле имени функции.
 local expect = require "cc.expect"
@@ -60,8 +60,8 @@ end
 function tFunctionLists.getSettings(sTableLabel, nDefaultTime) --> operResContent(string), errorMsg(string)
     expect.expect(1, sTableLabel, "string")
     expect.expect(2, nDefaultTime, "number", "nil")
-    if nDefaultTime <= 0 then return nil, "not correct timer time" end -- Если значение для таймера неверное
     if nDefaultTime == nil then nDefaultTime = 5 end -- Если пользователь не указал максимальное время, то оно равно значению по умолчанию
+    if nDefaultTime <= 0 then return nil, "not correct timer time" end -- Если значение для таймера неверное
     local nRequestId = os.startTimer(nDefaultTime) -- Запускаем таймер, который будет служить ID, и непосредственно таймером
 
     --Отдача команды и ожидание ответа
@@ -82,8 +82,8 @@ function tFunctionLists.setSettings(sTableLabel, sTableValue, nDefaultTime) --> 
     expect.expect(1, sTableLabel, "string")
     expect.expect(2, sTableValue, "string")
     expect.expect(3, nDefaultTime, "number", "nil")
-    if nDefaultTime <= 0 then return false, "not correct timer time" end -- Если значение для таймера неверное
     if nDefaultTime == nil then nDefaultTime = 5 end -- Если пользователь не указал максимальное время, то оно равно значению по умолчанию
+    if nDefaultTime <= 0 then return false, "not correct timer time" end -- Если значение для таймера неверное
     local nRequestId = os.startTimer(nDefaultTime) -- Запускаем таймер, который будет служить ID, и непосредственно таймером
 
     --Отдача команды и ожидание ответа
