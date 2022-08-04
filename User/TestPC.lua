@@ -1,4 +1,10 @@
 local fService = require("ServicePrograms")
-print(fService.getTurtleDirection())
-print("\nFile launch v1:")
-shell.run("/CCEnv/ServicePrograms.lua")
+print("TestPC test 1.1:")
+
+local function test()
+    fService.getSettings("value1")
+    fService.setSettings("pole1", "14")
+    print(fService.getSettings("pole1"))
+end
+
+parallel.waitForAny(test, fService.fSettingsDriver)
