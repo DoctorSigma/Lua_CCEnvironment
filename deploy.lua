@@ -55,7 +55,7 @@ function fWaitOrSkip(nTimerTime, aTimerAnsw, aSkipAnsw, fEventCher) -->  --> con
 	local nTimerId = os.startTimer(nTimerTime)--запускаем таймер и сохраняем его ИД
 	while true do
 		local tEventReturn = {}
-		tEventReturn = os.pullEvent()
+		tEventReturn[1], tEventReturn[2] = os.pullEvent()
 		print("fWaitOrSkip_TEST", nTimerId, tEventReturn[1], tEventReturn[2])  --DEBUG
 		if ((tEventReturn[1] == "timer") and (tEventReturn[2] == nTimerId)) then -- Если таймер уже вышел
 			print("fWaitOrSkip_TEST1")  --DEBUG
@@ -231,7 +231,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 				term.setCursorPos(1, nDisplayHight) -- Ставим курсов в начало последней строки
 				term.write("Wait or press any key") -- Пишем подсказку
 				 -- ждём пол секкунды или запуск функции, в которой, если функция вернет true, тогда значение "aSkipAnsw" вернётся как результат первой функций "fWaitOrSkip()"
-				fWaitOrSkip(0.5, true, true, function(eventTbl) print("Test1111") end)--if ((eventTbl[1] == "key")) then return true end end)
+				fWaitOrSkip(0.5, true, true, function(eventTbl)  if ((eventTbl[1] == "key")) then print("TEST1111") return true end end)
 				term.clearLine() -- Очищаем строку на которой біла подсказка
 				term.setCursorPos(1, nDisplayHight) -- Ставим курсов в начало последней строки
 			end
@@ -264,5 +264,5 @@ end
 
 -- Непосредственный запуск "распаковки" среды с GitHub
 local args = {...}
-print("#Name: deploy.lua# || #Version: 2.1.4.5#\n")
+print("#Name: deploy.lua# || #Version: 2.1.4.6#\n")
 clone(args[1], args[2])
