@@ -54,7 +54,8 @@ function fWaitOrSkip(nTimerTime, aTimerAnsw, aSkipAnsw, fEventCher) -->  --> con
 
 	local nTimerId = os.startTimer(nTimerTime)--запускаем таймер и сохраняем его ИД
 	while true do
-		local tEventReturn = os.pullEvent()
+		local tEventReturn = {}
+		tEventReturn = os.pullEvent()
 		print("fWaitOrSkip_TEST", nTimerId, tEventReturn[1], tEventReturn[2])  --DEBUG
 		if ((tEventReturn[1] == "timer") and (tEventReturn[2] == nTimerId)) then -- Если таймер уже вышел
 			print("fWaitOrSkip_TEST1")  --DEBUG
@@ -263,5 +264,5 @@ end
 
 -- Непосредственный запуск "распаковки" среды с GitHub
 local args = {...}
-print("#Name: deploy.lua# || #Version: 2.1.4.4#\n")
+print("#Name: deploy.lua# || #Version: 2.1.4.5#\n")
 clone(args[1], args[2])
