@@ -1,6 +1,9 @@
 local instrList_Name = "Instructions.txt"
 local settingsList_Name = "settings.txt"
 local prefix = "https://raw.githubusercontent.com/"
+local defaultFolderName = "CCEnv/"
+
+local expect = require "cc.expect"
 
 --TODO: Заметка: local modem = peripheral.find("modem") or error("No modem attached", 0)
 
@@ -18,11 +21,13 @@ function _GET(path) --> status(bool), errorMsg(string), content -- Читает 
 end
 
 --Функция считывание данных с клавиатуры за n секунд, или возвращения значение по умолчанию
-function fReadData(defaultValue) --> status(bool), errorMsg(string), content(string)
-	local expect = require "cc.expect"
+function fReadData(defaultValue, nTimerTime) --> status(bool), errorMsg(string), content(string)
 	expect.expect(1, defaultValue, "string", "nil")
+	expect.expect(2, nTimerTime, "number", "nil")
 
-	local nTimerId = os.startTimer(3)--запускаем таймер на 3 секунды и сохраняем его ИД
+	if ((nTimerTime == nil) or (nTimerTime <= 0)) then nTimerTime = 3 end
+
+	local nTimerId = os.startTimer(nTimerTime)--запускаем таймер на 3 секунды и сохраняем его ИД
 	while true do
 		local sEventName, eventArgs = os.pullEvent()
 		if ((sEventName == "timer") and (eventArgs == nTimerId) and (defaultValue ~= nil)) then -- Если таймер уже вышел и есть значение по умолчанию
@@ -32,6 +37,27 @@ function fReadData(defaultValue) --> status(bool), errorMsg(string), content(str
 		elseif ((sEventName == "char") and (eventArgs ~= ' ')) then -- Или ввели что-то другое
 			write(">")
 			return true, "", read(nil, nil, nil, eventArgs)
+		end
+	end
+end
+
+--Функция
+function fWaitOrSkip(nTimerTime, aTimerAnsw, aSkipAnsw, fEventCher) --> status(bool), errorMsg(string), content(string)
+	expect.expect(1, nTimerTime, "number")
+	expect.expect(2, aTimerAnsw, "string", "nil")
+	expect.expect(3, aSkipAnsw, "string", "nil")
+	expect.expect(4, fEventCher, "function", "nil")
+
+	if (nTimerTime <= 0) then nTimerTime = 1.5 end
+	if (fEventCher == nil) then fEventCher = function() return false end end
+
+	local nTimerId = os.startTimer(nTimerTime)--запускаем таймер и сохраняем его ИД
+	while true do
+		local tEventReturn = os.pullEvent()
+		if ((tEventReturn[1] == "timer") and (tEventReturn[2] == nTimerId)) then -- Если таймер уже вышел
+			return aTimerAnsw
+		elseif fEventCher(tEventReturn) then -- Или мы получили ответ
+			return aSkipAnsw
 		end
 	end
 end
@@ -54,29 +80,27 @@ function unerelObj(pathToFile) --> status(bool), errorMsg(string), content -- Ч
 end
 
 -- Функция записи данных
-function writeFileandObj(settingTable, curdir, repoPath, defaultFolderName) --> status(bool), errorMsg(string) -- Записывает файл настройки, файл с гибхаба, 
-    if settingTable.S_pinPathGit == nil then return false, "usetProgError: cannot get file from repository." end
+function writeFileandObj(settingTable, curdir, repoPath) --> status(bool), errorMsg(string) -- Записывает файл настройки, файл с гибхаба,
+    if settingTable.S_pinPathGit == nil then return false, "userProgError: cannot get file from repository." end
 	print("\nReceiving user programm: ", settingTable.S_pinPathGit)
 	local ok, _, userFile = _GET(repoPath .. settingTable.S_pinPathGit)
 	if not ok then 
 		print(" ..unexisted")
-		return false, 'usetProgError: cannot get file ("'..settingTable.S_pinPathGit..'") from repository.'
+		return false, 'userProgError: cannot get file ("'..settingTable.S_pinPathGit..'") from repository.'
 	else
-		if settingTable.S_pinLabel ~= os.getComputerLabel() then return false, "usetProgError: table error in key: S_pinLabel." -- Если метка пк не совпадает
-		else settingTable.S_pinLabel = os.getComputerLabel() end
 		local fout = fs.open(curdir .. defaultFolderName .. settingTable.S_pinProgramm .. ".lua", "w") -- Записываем файл программы
 		if fout ~= nil then 
 			fout.write(userFile)
 			fout.close()
-		else return false, "usetProgError: table error in key: S_pinProgramm." end
 
-		local foutSett = fs.open(curdir .. defaultFolderName .. settingsList_Name, "w") -- Записываем в файл настроек настройки)
-		foutSett.write(textutils.serialise(settingTable))
-		foutSett.close()
+			local foutSett = fs.open(curdir .. defaultFolderName .. settingsList_Name, "w") -- Записываем в файл настроек настройки)
+			foutSett.write(textutils.serialise(settingTable))
+			foutSett.close()
 
-		local foutStartup = fs.open("/startup.lua", "w") -- Записываем в файл стартапу настройки)
-		foutStartup.write('shell.run("'..curdir..defaultFolderName..settingTable.S_pinProgramm..'.lua"'..settingTable.S_pinStartArgs..')')
-		foutStartup.close()
+			local foutStartup = fs.open("/startup.lua", "w") -- Записываем в файл стартапу настройки)
+			foutStartup.write('shell.run("'..curdir..defaultFolderName..settingTable.S_pinProgramm..'.lua"'..settingTable.S_pinStartArgs..')')
+			foutStartup.close()
+		else return false, "userProgError: table error in key: S_pinProgramm." end
 	end
 	
 	return true, ""
@@ -89,8 +113,6 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 	local compLabel = os.getComputerLabel()
 	local userProgTable = {}
 	local isUserProg = false
-	---@type string
-	local old_defaultFolderName
 
 	if branch == nil then -- Если в аргументах не была указана ветка, то устанавливается значение по умолчанию, "master"
         branch = "master"
@@ -120,40 +142,22 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
         return (print(' Repository "' .. repo .. '" does not contain the following file: ' .. instrList_Name) and false), (' Repository "' .. repo .. '" does not contain the following file: ' .. instrList_Name)
     end                               
 									  
-	-- Подготовка к удалению старой папки с файлами
-	local _, _, defaultFolderName = string.find(instrList_File, '!defaultFolderName="(.-)"') -- Чтение нового названия папки с репозитория
-	if defaultFolderName == nil then -- Если файл на репозитории не содержит "default Folder Name", то завершаем
-		errorFlag = true
-		return (print(' File "' .. instrList_Name .. '" does not contain "defaultFolderName"') and false), (' File "' .. instrList_File .. '" does not contain "defaultFolderName"')
-	end
-	
-	defaultFolderName = (defaultFolderName .. "/") -- Добавления слеша в конец названия	
-	
-	local fin = fs.open(curdir .. instrList_Name, "r") -- Пробуем открыть локальный файл с инструкциями
-	if fin ~= nil then -- Если файл открылся
-		_, _, old_defaultFolderName = string.find(fin.readAll(), '!defaultFolderName="(.-)"') -- Чтение старого названия папки с ПК
-		fin.close()
-		if ((old_defaultFolderName ~= nil) and (fs.exists(old_defaultFolderName .. "/"))) then -- Если в файле есть старое название и папка существует, то ...
-			old_defaultFolderName = (old_defaultFolderName .. "/")
-			if fs.exists("deleteFolder_" .. old_defaultFolderName) then shell.run("delete", "deleteFolder_" .. old_defaultFolderName) end
-			shell.run("rename", old_defaultFolderName, "deleteFolder_" .. old_defaultFolderName) -- Переименовываем старую папку, для последующего удаления
-			old_defaultFolderName = "deleteFolder_" .. old_defaultFolderName -- Присваиваем переменной название старой переименованой папки
-		else
-			old_defaultFolderName = nil -- Для того, чтобы когда в файле есть название папка, а самой папки не было, то чтобы программа не пыталась удалить не существующую папку
-		end
-	end
+	-- Прейменовуємо стару папку для подальшого в її видалення
+	if fs.exists("deleteFolder_" .. defaultFolderName) then shell.run("delete", "deleteFolder_" .. defaultFolderName) end
+	local renameStatus = shell.run("rename", defaultFolderName, "deleteFolder_" .. defaultFolderName) -- Переименовываем старую папку, для последующего удаления
+	print("RENAME STATUSS", renameStatus)
 
 	-- Назначение метки для ПК, если нужно
 	if compLabel == nil then -- Если в пк нет метки, то ...
-		write("Your PC does not have a label, please enter it below:\n> ")
-		repeat -- Цыкли с после-условием для проверки введеного значения
-			compLabel = fReadData()
-			if compLabel == nil then print("Incorrect label name, please enter again: ") end
-		until compLabel ~= nil
-		os.setComputerLabel(compLabel)
+		print(" - Your PC does not have a label, please enter it below:")
 	else --Предложение сменить метку
-		--TODO: написать функцию для условного считывания данных с пк: если пользователь ничего не вводит 5 секунд, или вводит останавливемый символ, то берётся значение по умолчанию
+		print(" - Your PC already has a label, but if you want to change it, you can enter it below within 3 seconds (to skip faster, press \"space\"):")
 	end
+	repeat -- Цыкли с после-условием для проверки введеного значения
+		local tempCompLabel = fReadData(compLabel)
+		if tempCompLabel == nil then print("Incorrect label name, please enter again: ") else compLabel = tempCompLabel end
+	until tempCompLabel ~= nil
+	os.setComputerLabel(compLabel)
 
 	-- Клонирование нужных файлов с репозитория на ПК
 	for fTag, fName in string.gmatch(instrList_File, '#(.-)="(.-)"') do -- Читай и испольняем некоторые с файла инструкции
@@ -175,7 +179,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 				local _, _, progName = string.find(fPath, "/(.-).lua") -- Извлекаем название программы
 				table.insert(userProgTable, {kProgName = progName, kPath = fPath, kStartupArgs = fstartupArgs})
 
-				if progName == compLabel then -- Если есть приложение с таким же названием как и пк, то ..
+				if progName == compLabel and false then -- Если есть приложение с таким же названием как и пк, то ..
 					print("\nReceiving user programm: ", fPath)
 					local ok, _, content = _GET(repoPath .. fPath)
 					if not ok then print(" ..unexisted") else
@@ -195,93 +199,62 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 
 	-- Обработка таблицы с пользовательскими программами, если нужна
 	if not isUserProg then -- Если мы не нашли нужной программы
-		local unserTempPath = ((old_defaultFolderName == nil) and ("") or (old_defaultFolderName)) -- Предпологаемый путь к файлу с настройками
-		--TODO: серилизацию десерилизацию файлов на функцию, которая будет работать через евенты, чтобы обеспечить правильность обробки данных. Функция будет ожидать ивента, и данних которые нужно записати/считать
-		local status, errMsg, tSettings = unerelObj(curdir .. unserTempPath .. settingsList_Name) -- Пробуем десерилизировать данные с файла настройки
-		if status then -- Если данные серилизировались, то ...
-			local writeStatus, errMsgWrite = writeFileandObj(tSettings, curdir, repoPath, defaultFolderName) -- Запись в файлы
-			if not writeStatus then -- Если при записи возникли ошибки
-				print("\n  " .. errMsgWrite .. " So select the program from the list below (enter number of programm):\n -if you don't want to attach a custom program, enter 0:\n -if you want to download all existing custom programs, enter -1:\n")
-				for k, v in pairs(userProgTable) do textutils.pagedPrint(" ["..k.."] ".."Name: "..v.kProgName) end -- Подобно "print()", но если нету места на дисплее, то оно позволит вам увидеть весь список
+		local sDefaultProgramm -- Переменная для того, чтобы задать значение по умолчанию в зависимости от ситуации.
 
-				local inputValue = -2
-				repeat -- Цыкли с после-условием для проверки введеного значения
-					write("\n> ")
-					inputValue = tonumber(fReadData("0"))
-					if inputValue > #userProgTable then print("Too big value, please enter again: ") end
-				until inputValue <= #userProgTable
-
-				if inputValue > 0 then
-					tSettings.S_pinProgramm = userProgTable[inputValue].kProgName
-					tSettings.S_pinPathGit = userProgTable[inputValue].kPath
-					tSettings.S_pinStartArgs = userProgTable[inputValue].kStartupArgs
-					tSettings.S_pinLabel = compLabel
-
-					writeStatus, errMsgWrite = writeFileandObj(tSettings, curdir, repoPath, defaultFolderName) -- Запись в файлы
-					if not writeStatus then print(errMsgWrite) errorFlag = true
-					else
-						print('\nProgramm "'..tSettings.S_pinProgramm..'" was connected to "'..tSettings.S_pinLabel..'" label.')
-					end
-				elseif inputValue == 0 then -- Если мы не хотим скачивать программы
-					print("No user programm has been downloaded.")
-				elseif inputValue == -1 then -- Если мы хотим скачать все программы, но не хотим привязывать определённую
-					for _, v in pairs(userProgTable) do
-						print("\nReceiving user programm: ", v.kPath)
-						local ok, _, content = _GET(repoPath .. v.kPath)
-						if not ok then print(" ..unexisted") else
-							local fout = fs.open(curdir .. defaultFolderName .. v.kPath, "w")
-							fout.write(content)
-							fout.close()
-						end
-					end
-				else
-
-				end
-			end
+		os.queueEvent("settings_driver_in", nil, "stop") -- Приостанавливаем роботу драйвера настроек, если он работает, и
+		sleep(1) -- ждём 1 секунду, чтобы он завершился
+		print("Test after STOP")
+		local status, errMsg, tSettings = unerelObj(curdir .. "deleteFolder_" .. defaultFolderName .. settingsList_Name) -- Пробуем десерилизировать данные с файла настройки
+		if ((status) and (tSettings.S_pinProgramm ~= nil) and false) then -- Если данные серилизировались и в таблице есть данные программы, то ...
+			print(' - The selected program for this PC is: "' .. tSettings.S_pinProgramm .. '".')
+			sDefaultProgramm = tSettings.S_pinProgramm
+			--local writeStatus, errMsgWrite = writeFileandObj(tSettings, curdir, repoPath, defaultFolderName) -- Запись в файлы
 		else -- Если нет, то делаем новый настроечный файл
-			print("\n--" .. errMsg .. " So select the program you'd like to pin to this PC from the list below (enter number of programm):\n -if you don't want to attach a custom program, enter 0:\n -if you want to download all existing custom programs, enter -1:\n")
-			for k, v in pairs(userProgTable) do textutils.pagedPrint(" ["..k.."] ".."Name: "..v.kProgName) end -- Подобно "print()", но если нету места на дисплее, то оно позволит вам увидеть весь список
+			if errMsg == nil then errMsg = "" end
+			print(' - Error: "' .. errMsg .. '". Select a program number from the list below, or:\n  - 0 to skip;\n  - -1 to download all programs.')
+		end
 
-			local inputValue = -2
-			repeat -- Цыкли с после-условием для проверки введеного значения
-				write("\n> ")
-				inputValue = tonumber(fReadData("0"))
-				if inputValue > #userProgTable then print("Too big value, please enter again: ") end
-			until inputValue <= #userProgTable
-
-			if inputValue > 0 then
-				local content = {S_pinProgramm = userProgTable[inputValue].kProgName, S_pinPathGit = userProgTable[inputValue].kPath, S_pinStartArgs = userProgTable[inputValue].kStartupArgs, S_pinLabel = compLabel} -- Новая таблица с данными, S - значить сервисные данные
-
-				local writeStatus, errMsgWrite = writeFileandObj(content, curdir, repoPath, defaultFolderName) -- Запись в файлы
-				if not writeStatus then print(errMsgWrite) errorFlag = true
-				else
-					print('\nProgramm "'..content.S_pinProgramm..'" was connected to "'..content.S_pinLabel..'" label.')
-				end
-			elseif inputValue == 0 then -- Если мы не хотим загружать программы
-				print("No user programm has been downloaded.")
-			elseif inputValue == -1 then -- Если мы хотим скачать все программы, но не хотим привязывать определённую
-				for _, v in pairs(userProgTable) do
-					print("\nReceiving user programm: ", v.kPath)
-					local ok, _, content = _GET(repoPath .. v.kPath)
-					if not ok then print(" ..unexisted") else
-						local fout = fs.open(curdir .. defaultFolderName .. v.kPath, "w")
-						fout.write(content)
-						fout.close()
-					end
-				end
-			else
-
+		 ---Выводим список программ
+		local _, nDisplayHight = term.getSize()
+		for k, v in pairs(userProgTable) do
+			local _, nCursPosY = term.getCursorPos() -- Позиция где курсор БУДЕТ ПЕЧАТАТЬ
+			if nCursPosY == (nDisplayHight) then --Если курсор уже на последней строке
+				term.scroll(1) -- Поднимаем весь текст вверх
+				term.setCursorPos(1, nDisplayHight) -- Ставим курсов в начало последней строки
+				term.write("Wait or press any key") -- Пишем подсказку
+				 -- ждём пол секкунды или запуск функции, в которой, если функция вернет true, тогда значение "aSkipAnsw" вернётся как результат первой функций "fWaitOrSkip()"
+				fWaitOrSkip(0.5, true, true, function(eventTbl) if ((eventTbl[1] == "key")) then return true end end)
+				term.clearLine() -- Очищаем строку на которой біла подсказка
+				term.setCursorPos(1, nDisplayHight) -- Ставим курсов в начало последней строки
 			end
+			print(" ["..k.."] ".."Name: "..v.kProgName) -- Подобно "print()", но если нету места на дисплее, то оно позволит вам увидеть весь список
+		end
+
+		---Очікуємо вводу користувача, або значення за замовчуванням
+		repeat -- Цыкли с после-условием для проверки введеного значения
+			write("\n> ")
+			inputValue = tonumber(fReadData("0"))
+			if ((inputValue > #userProgTable) and (inputValue < 0)) then print("Please enter again: ") end
+		until ((inputValue <= #userProgTable) and (inputValue >= 0))
+
+		if inputValue > 0 then
+			local content = {S_pinProgramm = userProgTable[inputValue].kProgName, S_pinPathGit = userProgTable[inputValue].kPath, S_pinStartArgs = userProgTable[inputValue].kStartupArgs} -- Новая таблица с данными, S - значить сервисные данные
+
+			local writeStatus, errMsgWrite = writeFileandObj(content, curdir, repoPath) -- Запись в файлы
+			if not writeStatus then print(errMsgWrite) errorFlag = true
+			else print('\nProgramm "'..content.S_pinProgramm..'" was connected to "'..os.getComputerLabel()..'" label.') end
+		elseif inputValue == 0 then
+			print("No user programm has been downloaded.") -- Если мы не хотим загружать программы
 		end
 	end
 
--- Удаление старой папки
-	if old_defaultFolderName ~= nil then shell.run("delete", old_defaultFolderName) end -- Удаляем старую папку, если она существовала
+	-- Удаление старой папки
+	if renameStatus then shell.run("delete", "deleteFolder_" .. defaultFolderName) end -- Удаляем старую папку, если она существовала
 	return true, ""
 end
 
 
 -- Непосредственный запуск "распаковки" среды с GitHub
 local args = {...}
-print("#Name: deploy.lua# || #Version: 2.0.4.5#\n")
+print("#Name: deploy.lua# || #Version: 2.1.0#\n")
 clone(args[1], args[2])
