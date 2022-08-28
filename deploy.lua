@@ -144,7 +144,8 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 									  
 	-- Прейменовуємо стару папку для подальшого в її видалення
 	if fs.exists("deleteFolder_" .. defaultFolderName) then shell.run("delete", "deleteFolder_" .. defaultFolderName) end
-	local renameStatus = shell.run("rename", defaultFolderName, "deleteFolder_" .. defaultFolderName) -- Переименовываем старую папку, для последующего удаления
+	local renameStatus
+	if fs.exists(defaultFolderName) then renameStatus = shell.run("rename", defaultFolderName, "deleteFolder_" .. defaultFolderName) end -- Переименовываем старую папку, для последующего удаления
 	print("RENAME STATUSS", renameStatus)
 
 	-- Назначение метки для ПК, если нужно
@@ -157,6 +158,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 		local tempCompLabel = fReadData(compLabel)
 		if tempCompLabel == nil then print("Incorrect label name, please enter again: ") else compLabel = tempCompLabel end
 	until tempCompLabel ~= nil
+	print("COMP LABEL", compLabel)
 	os.setComputerLabel(compLabel)
 
 	-- Клонирование нужных файлов с репозитория на ПК
@@ -256,5 +258,5 @@ end
 
 -- Непосредственный запуск "распаковки" среды с GitHub
 local args = {...}
-print("#Name: deploy.lua# || #Version: 2.1.0#\n")
+print("#Name: deploy.lua# || #Version: 2.1.1#\n")
 clone(args[1], args[2])
