@@ -21,7 +21,7 @@ function _GET(path) --> status(bool), errorMsg(string), content -- Читает 
 end
 
 --Функция считывание данных с клавиатуры за n секунд, или возвращения значение по умолчанию
-function fReadData(defaultValue, nTimerTime) --> status(bool), errorMsg(string), content(string)
+function fReadData(defaultValue, nTimerTime) -->  --> content(string) | nil, nil | errorMsg(string)
 	expect.expect(1, defaultValue, "string", "nil")
 	expect.expect(2, nTimerTime, "number", "nil")
 
@@ -31,14 +31,15 @@ function fReadData(defaultValue, nTimerTime) --> status(bool), errorMsg(string),
 	while true do
 		local sEventName, eventArgs = os.pullEvent()
 		if ((sEventName == "timer") and (eventArgs == nTimerId) and (defaultValue ~= nil)) then -- Если таймер уже вышел и есть значение по умолчанию
-			return true, "", defaultValue
+			return defaultValue
 		elseif ((sEventName == "char") and (eventArgs == ' ') and (defaultValue ~= nil)) then -- Или мы нажали на пробел и есть значение по умолчанию
-			return true, "", defaultValue
+			return defaultValue
 		elseif ((sEventName == "char") and (eventArgs ~= ' ')) then -- Или ввели что-то другое
 			write(">")
-			return true, "", read(nil, nil, nil, eventArgs)
+			return read(nil, nil, nil, eventArgs)
 		end
 	end
+	return nil, "EoF"
 end
 
 --Функция
@@ -146,7 +147,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 	if fs.exists("deleteFolder_" .. defaultFolderName) then shell.run("delete", "deleteFolder_" .. defaultFolderName) end
 	local renameStatus
 	if fs.exists(defaultFolderName) then renameStatus = shell.run("rename", defaultFolderName, "deleteFolder_" .. defaultFolderName) end -- Переименовываем старую папку, для последующего удаления
-	print("RENAME STATUSS", renameStatus)
+	print("RENAME STATUSS", renameStatus) --DEBUG
 
 	-- Назначение метки для ПК, если нужно
 	if compLabel == nil then -- Если в пк нет метки, то ...
@@ -158,7 +159,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 		local tempCompLabel = fReadData(compLabel)
 		if tempCompLabel == nil then print("Incorrect label name, please enter again: ") else compLabel = tempCompLabel end
 	until tempCompLabel ~= nil
-	print("COMP LABEL", compLabel)
+	print("COMP LABEL", compLabel) --DEBUG
 	os.setComputerLabel(compLabel)
 
 	-- Клонирование нужных файлов с репозитория на ПК
@@ -258,5 +259,5 @@ end
 
 -- Непосредственный запуск "распаковки" среды с GitHub
 local args = {...}
-print("#Name: deploy.lua# || #Version: 2.1.1#\n")
+print("#Name: deploy.lua# || #Version: 2.1.2#\n")
 clone(args[1], args[2])
