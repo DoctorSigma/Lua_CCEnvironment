@@ -230,7 +230,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 				term.setCursorPos(1, nDisplayHight) -- Ставим курсов в начало последней строки
 				term.write("Wait or press any key") -- Пишем подсказку
 				 -- ждём пол секкунды или запуск функции, в которой, если функция вернет true, тогда значение "aSkipAnsw" вернётся как результат первой функций "fWaitOrSkip()"
-				fWaitOrSkip(0.5, true, true, function(eventTbl) if ((eventTbl[1] == "key")) then return true end end)
+				fWaitOrSkip(0.5, true, true, function(eventTbl) print("Test1111") end)--if ((eventTbl[1] == "key")) then return true end end)
 				term.clearLine() -- Очищаем строку на которой біла подсказка
 				term.setCursorPos(1, nDisplayHight) -- Ставим курсов в начало последней строки
 			end
@@ -263,5 +263,5 @@ end
 
 -- Непосредственный запуск "распаковки" среды с GitHub
 local args = {...}
-print("#Name: deploy.lua# || #Version: 2.1.4.3#\n")
+print("#Name: deploy.lua# || #Version: 2.1.4.4#\n")
 clone(args[1], args[2])
