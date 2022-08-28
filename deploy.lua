@@ -43,10 +43,10 @@ function fReadData(defaultValue, nTimerTime) -->  --> content(string) | nil, nil
 end
 
 --Функция
-function fWaitOrSkip(nTimerTime, aTimerAnsw, aSkipAnsw, fEventCher) --> status(bool), errorMsg(string), content(string)
+function fWaitOrSkip(nTimerTime, aTimerAnsw, aSkipAnsw, fEventCher) -->  --> content(Any) | nil, nil | errorMsg(string)
 	expect.expect(1, nTimerTime, "number")
-	expect.expect(2, aTimerAnsw, "string", "nil")
-	expect.expect(3, aSkipAnsw, "string", "nil")
+	--expect.expect(2, aTimerAnsw, "string", "nil")
+	--expect.expect(3, aSkipAnsw, "string", "nil")
 	expect.expect(4, fEventCher, "function", "nil")
 
 	if (nTimerTime <= 0) then nTimerTime = 1.5 end
@@ -206,7 +206,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 
 		os.queueEvent("settings_driver_in", nil, "stop") -- Приостанавливаем роботу драйвера настроек, если он работает, и
 		sleep(1) -- ждём 1 секунду, чтобы он завершился
-		print("Test after STOP")
+		print("Test after STOP")  --DEBUG
 		local status, errMsg, tSettings = unerelObj(curdir .. "deleteFolder_" .. defaultFolderName .. settingsList_Name) -- Пробуем десерилизировать данные с файла настройки
 		if ((status) and (tSettings.S_pinProgramm ~= nil) and false) then -- Если данные серилизировались и в таблице есть данные программы, то ...
 			print(' - The selected program for this PC is: "' .. tSettings.S_pinProgramm .. '".')
@@ -259,5 +259,5 @@ end
 
 -- Непосредственный запуск "распаковки" среды с GitHub
 local args = {...}
-print("#Name: deploy.lua# || #Version: 2.1.2#\n")
+print("#Name: deploy.lua# || #Version: 2.1.3#\n")
 clone(args[1], args[2])
