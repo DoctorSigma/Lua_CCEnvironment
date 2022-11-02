@@ -8,7 +8,7 @@ local expect = require "cc.expect"
 --TODO: Заметка: local modem = peripheral.find("modem") or error("No modem attached", 0)
 
 -- Функция загрузки данных
-function _GET(path) --> content, nil | nil, errorMsg(string) -- Читает данные с GitHub
+function _GET(path) --> content, nil | nil, isError(string) -- Читает данные с GitHub
     local handle = http.get(prefix .. path)
 	
     if (handle == nil) or (handle.getResponseCode() ~= 200) then
@@ -21,7 +21,7 @@ function _GET(path) --> content, nil | nil, errorMsg(string) -- Читает д�
 end
 
 --Функция считывание данных с клавиатуры за n секунд, или возвращения значение по умолчанию
-function fReadData(defaultValue, nTimerTime) -->  --> content(string) | nil, nil | errorMsg(string)
+function fReadData(defaultValue, nTimerTime) -->  --> content(string) | nil, nil | isError(string)
 	expect.expect(1, defaultValue, "string", "nil")
 	expect.expect(2, nTimerTime, "number", "nil")
 
@@ -43,7 +43,7 @@ function fReadData(defaultValue, nTimerTime) -->  --> content(string) | nil, nil
 end
 
 --Функция
-function fWaitOrSkip(nTimerTime, aTimerAnsw, aSkipAnsw, fEventCher) -->  content(Any) | nil, nil | errorMsg(string)
+function fWaitOrSkip(nTimerTime, aTimerAnsw, aSkipAnsw, fEventCher) -->  content(Any) | nil, nil | isError(string)
 	expect.expect(1, nTimerTime, "number")
 	--expect.expect(2, aTimerAnsw, "string", "nil")
 	--expect.expect(3, aSkipAnsw, "string", "nil")
@@ -64,25 +64,25 @@ function fWaitOrSkip(nTimerTime, aTimerAnsw, aSkipAnsw, fEventCher) -->  content
 end
 
 -- Функция десерилизации данных
-function unserelObj(pathToFile) --> content(Any) | nil, nil | errorMsg(string) -- Читает данные с файла и проводит десерилизацию
+function unserelObj(pathToFile) --> content(Any) | nil, nil | isError(string) -- Читает данные с файла и проводит десерилизацию
     if fs.exists(pathToFile) == true then -- Если есть старая папка, и файл с настройками открылся, то пробуем искать с настройками в ней
 		local fin = fs.open(pathToFile, "r") -- Пробуем открыть локальный файл с инструкциями
 		if fin ~= nil then -- Если файл старых локальных настроек открылся
 			local unserializeObj = textutils.unserialize(fin.readAll()) -- Пробуем читать из файла с настройками
 			fin.close()
 			if unserializeObj ~= nil then
-				return unserializeObj
+				return unserializeObj, nil
 			else return nil, 'Cannot unserialize data into object ("'..pathToFile..'")' end -- Ошибка: не смогли десерелизировать данные
 		else return nil, 'Cannot open a file ("'..pathToFile..'")' end -- Ошибка: не смогли открыть файл
 	else return nil, 'Folder or file ("'..pathToFile..'") does not exists' end -- Ошибка: не смогли найти файл или папку
 end
 
 -- Функция записи данных
-function writeFileandObj(settingTable, curdir, repoPath) --> nil | errorMsg(string) -- Записывает файл настройки, файл с гибхаба,
-    if settingTable.S_pinPathGit == nil then return false, "userProgError: cannot get file from repository." end
+function writeFileandObj(settingTable, curdir, repoPath) --> nil | isError(string) -- Записывает файл настройки, файл с гибхаба,
+    if settingTable.S_pinPathGit == nil then return "userProgError: cannot get file from repository." end
 	print("\nReceiving user programm: ", settingTable.S_pinPathGit)
-	local userFile, ok = _GET(repoPath .. settingTable.S_pinPathGit)
-	if not ok then -- якшо не робе то замынити на: if ok~=nil then
+	local userFile, isError = _GET(repoPath .. settingTable.S_pinPathGit)
+	if isError then
 		print(" ..unexisted")
 		return 'userProgError: cannot get file ("'..settingTable.S_pinPathGit..'") from repository.'
 	else
@@ -105,7 +105,7 @@ function writeFileandObj(settingTable, curdir, repoPath) --> nil | errorMsg(stri
 end
 
 -- Функция клонирования репозитория
-function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонирует данные с GitHub
+function clone(repo, branch) -->  isError(bool), isError(string) -- Клонирует данные с GitHub
 	local errorFlag = false
     local curdir = shell.dir() .. "/"
 	local compLabel = os.getComputerLabel()
@@ -132,9 +132,9 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 
 	-- Открываем репозиторий
     local repoPath = repo .. "/" .. branch .. "/" -- Путь в репозитории
-    local instrList_File, instrList_ok = _GET(repoPath .. instrList_Name) -- Попытка загрузить файл с инструкциями
+    local instrList_File, instrList_isError = _GET(repoPath .. instrList_Name) -- Попытка загрузить файл с инструкциями
 
-    if instrList_ok then -- Если не удалось загрузить инструкции
+    if instrList_isError then -- Если не удалось загрузить инструкции
 		errorFlag = true
         return (print(' Repository "' .. repo .. '" does not contain the following file: ' .. instrList_Name) and false), (' Repository "' .. repo .. '" does not contain the following file: ' .. instrList_Name)
     end                               
@@ -162,8 +162,8 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 		if (fTag == "!") or (fTag == "Service") or (fTag == "File") then -- Если после ключевого символа "#" есть ("!" или "Service" или "File") то это служебные прогаммы и должны быть установлены везде
 			--TODO: использовать функцию, которая будет посылать данные в консоль, и откправлять на базу, и на КПК
 			print("Receiving: ", fName)
-            local content, ok = _GET(repoPath .. fName)
-            if ok then print(" ..unexisted") else
+            local content, isError = _GET(repoPath .. fName)
+            if isError then print(" ..unexisted") else
 				local instalDir = ((fTag == "!") and ("") or (defaultFolderName)) -- "Тернарный оператор", конструктция:(s = condition ? "true" : "false"), пояснение: оператор "and" возвращает первое ложное значение среди сових операндов; если оба операнда истинны, возвращается последний из них, а оператор "or" возвращает первое истинное значение среди своих операндов; если оба операнда ложны, возвращается последний из них
 																				  -- Если "!", то не нужно перемещать файл в подпапку, но если "Service", то нужно переместить в папку по умолчанию
 				local fout = fs.open(curdir .. instalDir .. fName, "w")
@@ -179,8 +179,8 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 
 				if progName == compLabel and false then -- Если есть приложение с таким же названием как и пк, то ..
 					print("\nReceiving user programm: ", fPath)
-					local content, ok = _GET(repoPath .. fPath)
-					if ok then print(" ..unexisted") else
+					local content, isError = _GET(repoPath .. fPath)
+					if isError then print(" ..unexisted") else
 						local fout = fs.open(curdir .. defaultFolderName .. progName .. ".lua", "w")
 						fout.write(content)
 						fout.close()
@@ -241,8 +241,8 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 		if inputValue > 0 then
 			local content = {S_pinProgramm = userProgTable[inputValue].kProgName, S_pinPathGit = userProgTable[inputValue].kPath, S_pinStartArgs = userProgTable[inputValue].kStartupArgs} -- Новая таблица с данными, S - значить сервисные данные
 
-			local writeStatus= writeFileandObj(content, curdir, repoPath) -- Запись в файлы
-			if writeStatus then print(writeStatus) errorFlag = true
+			local writeSIsError= writeFileandObj(content, curdir, repoPath) -- Запись в файлы
+			if writeSIsError then print(writeSIsError) errorFlag = true
 			else print('\nProgramm "'..content.S_pinProgramm..'" was connected to "'..os.getComputerLabel()..'" label.') end
 		elseif inputValue == 0 then
 			print("No user programm has been downloaded.") -- Если мы не хотим загружать программы
@@ -257,5 +257,5 @@ end
 
 -- Непосредственный запуск "распаковки" среды с GitHub
 local args = {...}
-print("#Name: deploy.lua# || #Version: 2.2.3#\n")
+print("#Name: deploy.lua# || #Version: 2.2.5#\n")
 clone(args[1], args[2])
