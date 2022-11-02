@@ -1,3 +1,7 @@
+if not computer then
+    printError("Error: requires a PC")
+end
+
 local fService = require("ServicePrograms")
 print("TestPC test 1.3.5:")
 
