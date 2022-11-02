@@ -125,13 +125,13 @@ function tFunctionLists.fReadData(defaultValue, nTimerTime) --> content(string),
 end
 
 -- Функція отримання напрямку черепахи
-function tFunctionLists.getTurtleDirection() --> errorMsg(string) | nil, direction(vector) -- No change position
+function tFunctionLists.getTurtleDirection() --> direction(vector), nil | errorMsg(string), nil -- No change position
 	local i = 1 -- Счётчик цыкла
 	local h = 0 -- Счётчик относительной высоты
 	
     -- Определяем наши координаты
 	local xPos, _, zPos = gps.locate(1)
-	if xPos == nil then return "I can't find gps!!!(start)", nil end -- Если не смогли определить местоположение
+	if xPos == nil then return nil, "I can't find gps!!!(start)" end -- Если не смогли определить местоположение
     -- Пробуем двигатся вперёд
 	while not turtle.forward() do -- Если черепах не смогла двинуться вперёд, то ...
 		if math.fmod(i, 4) == 0 then -- Если мы пробовали пройти вперёд уже 4 раза, то ..
@@ -141,7 +141,7 @@ function tFunctionLists.getTurtleDirection() --> errorMsg(string) | nil, directi
 			elseif turtle.down() then -- Если мы не смогли поднятся вверх, но можем вниз, то ..
 				h = h - 1
 			else -- Мы не смогли никуда повернутся, ошибка
-				return "I can't move anywhere!!", nil
+				return nil, "I can't move anywhere!!"
 			end
 		else -- Если ещё не повернулись 4 раза, то ..		
 			turtle.turnRight()
@@ -151,38 +151,42 @@ function tFunctionLists.getTurtleDirection() --> errorMsg(string) | nil, directi
 	
     -- Определям новое местоположение
 	local xRel, _, zRel = gps.locate(1)
-	if xRel == nil then return "I can't find gps!!!(final)", nil end -- Если не смогли определить местоположение
+	if xRel == nil then return nil, "I can't find gps!!!(final)" end -- Если не смогли определить местоположение
 	
     -- "Обнуляем" набраную позицию
-	if not turtle.back() then return "I can't move back!!", nil end -- Возвращаемся назад, так как двигались вперёд
+	if not turtle.back() then return nil, "I can't move back!!" end -- Возвращаемся назад, так как двигались вперёд
 	while h ~= 0 do -- Если мы двигались по вертикале, то пробуем обнулить набраную высоту
 		if h < 0 then 
-			if not turtle.up() then return "I can't move up!!", nil
+			if not turtle.up() then return nil, "I can't move up!!"
 			else h = h + 1 end
 		elseif h > 0 then
-			if not turtle.down() then return "I can't move down!!", nil
+			if not turtle.down() then return nil, "I can't move down!!"
 			else h = h - 1 end
 		end
 	end
 	
     -- Возвращаем направление
 	local vDir = vector.new(xRel, 0, zRel) - vector.new(xPos, 0, zPos)
-	return nil, vDir:normalize()
+	return vDir:normalize(), nil
 end
 
 -- Фунція повороту праворуч
-function tFunctionLists.setTurtleRight(vDirection) --> NowDirection(vector)
-    if turtle.turnRight() then return vDirection:cross(vector.new(0, 1, 0)) end
+function tFunctionLists.setTurtleRight(vDirection) --> NowDirection(vector), nil | nil, errorMsg(string)
+    expect.expect(1, vDirection, "vector")
+    if turtle.turnRight() then return vDirection:cross(vector.new(0, 1, 0)), nil
+    else return nil, "Can't turn right" end
 end
 
 -- Фунція повороту ліворуч
-function tFunctionLists.setTurtleLeft(vDirection) --> NowDirection(vector)
-    if turtle.turnLeft() then return vDirection:cross(vector.new(0, -1, 0)) end
+function tFunctionLists.setTurtleLeft(vDirection) --> NowDirection(vector), nil | nil, errorMsg(string)
+    expect.expect(1, vDirection, "vector")
+    if turtle.turnLeft() then return vDirection:cross(vector.new(0, -1, 0)), nil
+    else return nil, "Can't turn left" end
 end
 
 -- Функция поиска пути к определенным координатам
 function tFunctionLists.goToGps(vDirection, allowDig) --> errorMsg(string) | nil, NowDirection(vector)
-    expect.expect(1, vDirection, "vector", "nil")
+    expect.expect(1, vDirection, "vector")
     expect.expect(2, allowDig, "boolean", "nil")
 
 
@@ -267,5 +271,5 @@ function tFunctionLists.goToGps(vDirection, allowDig) --> errorMsg(string) | nil
     
 end
 
-print("#Name: ServicePrograms.lua# || #Version: 2.1.1#\n")
+print("#Name: ServicePrograms.lua# || #Version: 2.1.2#\n")
 return(tFunctionLists) -- Возвращает таблицу, в которой находятся функции.

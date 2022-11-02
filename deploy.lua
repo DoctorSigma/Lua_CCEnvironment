@@ -8,16 +8,16 @@ local expect = require "cc.expect"
 --TODO: Заметка: local modem = peripheral.find("modem") or error("No modem attached", 0)
 
 -- Функция загрузки данных
-function _GET(path) --> status(bool), errorMsg(string), content -- Читает данные с GitHub
+function _GET(path) --> content, nil | nil, errorMsg(string) -- Читает данные с GitHub
     local handle = http.get(prefix .. path)
 	
     if (handle == nil) or (handle.getResponseCode() ~= 200) then
-        return false, '"' .. path .. '" not responding', ""
+        return nil, '"' .. path .. '" not responding'
     end
 	
     local content = handle.readAll()
     handle.close()
-    return true, nil, content
+    return content, nil
 end
 
 --Функция считывание данных с клавиатуры за n секунд, или возвращения значение по умолчанию
@@ -78,13 +78,13 @@ function unserelObj(pathToFile) --> content(Any) | nil, nil | errorMsg(string) -
 end
 
 -- Функция записи данных
-function writeFileandObj(settingTable, curdir, repoPath) --> status(bool), errorMsg(string) -- Записывает файл настройки, файл с гибхаба,
+function writeFileandObj(settingTable, curdir, repoPath) --> nil | errorMsg(string) -- Записывает файл настройки, файл с гибхаба,
     if settingTable.S_pinPathGit == nil then return false, "userProgError: cannot get file from repository." end
 	print("\nReceiving user programm: ", settingTable.S_pinPathGit)
-	local ok, _, userFile = _GET(repoPath .. settingTable.S_pinPathGit)
-	if not ok then 
+	local userFile, ok = _GET(repoPath .. settingTable.S_pinPathGit)
+	if not ok then -- якшо не робе то замынити на: if ok~=nil then
 		print(" ..unexisted")
-		return false, 'userProgError: cannot get file ("'..settingTable.S_pinPathGit..'") from repository.'
+		return 'userProgError: cannot get file ("'..settingTable.S_pinPathGit..'") from repository.'
 	else
 		local fout = fs.open(curdir .. defaultFolderName .. settingTable.S_pinProgramm .. ".lua", "w") -- Записываем файл программы
 		if fout ~= nil then 
@@ -98,10 +98,10 @@ function writeFileandObj(settingTable, curdir, repoPath) --> status(bool), error
 			local foutStartup = fs.open("/startup.lua", "w") -- Записываем в файл стартапу настройки)
 			foutStartup.write('shell.run("'..curdir..defaultFolderName..settingTable.S_pinProgramm..'.lua"'..settingTable.S_pinStartArgs..')')
 			foutStartup.close()
-		else return false, "userProgError: table error in key: S_pinProgramm." end
+		else return "userProgError: table error in key: S_pinProgramm." end
 	end
 	
-	return true, ""
+	return nil
 end
 
 -- Функция клонирования репозитория
@@ -132,7 +132,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 
 	-- Открываем репозиторий
     local repoPath = repo .. "/" .. branch .. "/" -- Путь в репозитории
-    local instrList_ok, _, instrList_File = _GET(repoPath .. instrList_Name) -- Попытка загрузить файл с инструкциями
+    local instrList_File, instrList_ok = _GET(repoPath .. instrList_Name) -- Попытка загрузить файл с инструкциями
 
     if not instrList_ok then -- Если не удалось загрузить инструкции
 		errorFlag = true
@@ -162,7 +162,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 		if (fTag == "!") or (fTag == "Service") or (fTag == "File") then -- Если после ключевого символа "#" есть ("!" или "Service" или "File") то это служебные прогаммы и должны быть установлены везде
 			--TODO: использовать функцию, которая будет посылать данные в консоль, и откправлять на базу, и на КПК
 			print("Receiving: ", fName)
-            local ok, _, content = _GET(repoPath .. fName)
+            local content, ok = _GET(repoPath .. fName)
             if not ok then print(" ..unexisted") else
 				local instalDir = ((fTag == "!") and ("") or (defaultFolderName)) -- "Тернарный оператор", конструктция:(s = condition ? "true" : "false"), пояснение: оператор "and" возвращает первое ложное значение среди сових операндов; если оба операнда истинны, возвращается последний из них, а оператор "or" возвращает первое истинное значение среди своих операндов; если оба операнда ложны, возвращается последний из них
 																				  -- Если "!", то не нужно перемещать файл в подпапку, но если "Service", то нужно переместить в папку по умолчанию
@@ -179,7 +179,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 
 				if progName == compLabel and false then -- Если есть приложение с таким же названием как и пк, то ..
 					print("\nReceiving user programm: ", fPath)
-					local ok, _, content = _GET(repoPath .. fPath)
+					local content, ok = _GET(repoPath .. fPath)
 					if not ok then print(" ..unexisted") else
 						local fout = fs.open(curdir .. defaultFolderName .. progName .. ".lua", "w")
 						fout.write(content)
@@ -241,8 +241,8 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 		if inputValue > 0 then
 			local content = {S_pinProgramm = userProgTable[inputValue].kProgName, S_pinPathGit = userProgTable[inputValue].kPath, S_pinStartArgs = userProgTable[inputValue].kStartupArgs} -- Новая таблица с данными, S - значить сервисные данные
 
-			local writeStatus, errMsgWrite = writeFileandObj(content, curdir, repoPath) -- Запись в файлы
-			if not writeStatus then print(errMsgWrite) errorFlag = true
+			local writeStatus= writeFileandObj(content, curdir, repoPath) -- Запись в файлы
+			if writeStatus then print(writeStatus) errorFlag = true
 			else print('\nProgramm "'..content.S_pinProgramm..'" was connected to "'..os.getComputerLabel()..'" label.') end
 		elseif inputValue == 0 then
 			print("No user programm has been downloaded.") -- Если мы не хотим загружать программы
