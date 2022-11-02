@@ -25,7 +25,7 @@ function fReadData(defaultValue, nTimerTime) -->  --> content(string) | nil, nil
 	expect.expect(1, defaultValue, "string", "nil")
 	expect.expect(2, nTimerTime, "number", "nil")
 
-	if ((nTimerTime == nil) or (nTimerTime <= 0)) then nTimerTime = 3 end
+	if ((nTimerTime == nil) or (nTimerTime < 0)) then nTimerTime = 3 end
 
 	local nTimerId = os.startTimer(nTimerTime)--запускаем таймер на 3 секунды и сохраняем его ИД
 	while true do
@@ -43,45 +43,38 @@ function fReadData(defaultValue, nTimerTime) -->  --> content(string) | nil, nil
 end
 
 --Функция
-function fWaitOrSkip(nTimerTime, aTimerAnsw, aSkipAnsw, fEventCher) -->  --> content(Any) | nil, nil | errorMsg(string)
+function fWaitOrSkip(nTimerTime, aTimerAnsw, aSkipAnsw, fEventCher) -->  content(Any) | nil, nil | errorMsg(string)
 	expect.expect(1, nTimerTime, "number")
 	--expect.expect(2, aTimerAnsw, "string", "nil")
 	--expect.expect(3, aSkipAnsw, "string", "nil")
 	expect.expect(4, fEventCher, "function", "nil")
 
-	if (nTimerTime <= 0) then nTimerTime = 1.5 end
+	if (nTimerTime < 0) then nTimerTime = 1.5 end
 	if (fEventCher == nil) then fEventCher = function() return false end end
 
 	local nTimerId = os.startTimer(nTimerTime)--запускаем таймер и сохраняем его ИД
 	while true do
 		local tEventReturn = {os.pullEvent()}
-		print("fWaitOrSkip_TEST", nTimerId, tEventReturn[1], tEventReturn[2])  --DEBUG
 		if ((tEventReturn[1] == "timer") and (tEventReturn[2] == nTimerId)) then -- Если таймер уже вышел
-			print("fWaitOrSkip_TEST1")  --DEBUG
 			return aTimerAnsw
 		elseif fEventCher(tEventReturn) then -- Или мы получили ответ
-			print("fWaitOrSkip_TEST2")  --DEBUG
 			return aSkipAnsw
 		end
-		print("fWaitOrSkip_TEST_End")  --DEBUG
 	end
 end
 
 -- Функция десерилизации данных
-function unerelObj(pathToFile) --> status(bool), errorMsg(string), content -- Читает данные с файла и проводит десерилизацию
+function unserelObj(pathToFile) --> content(Any) | nil, nil | errorMsg(string) -- Читает данные с файла и проводит десерилизацию
     if fs.exists(pathToFile) == true then -- Если есть старая папка, и файл с настройками открылся, то пробуем искать с настройками в ней
 		local fin = fs.open(pathToFile, "r") -- Пробуем открыть локальный файл с инструкциями
 		if fin ~= nil then -- Если файл старых локальных настроек открылся
 			local unserializeObj = textutils.unserialize(fin.readAll()) -- Пробуем читать из файла с настройками
+			fin.close()
 			if unserializeObj ~= nil then
-				fin.close()			
-				return true, "", unserializeObj 
-			else 
-				fin.close()
-				return false, 'Cannot unserialize data into object.("'..pathToFile..'")', nil 
-			end -- Ошибка: не смогли десерелизировать данные
-		else return false, 'Cannot open a file("'..pathToFile..'").', nil end -- Ошибка: не смогли открыть файл
-	else return false, 'Folder or file ("'..pathToFile..'") does not exists.', nil end -- Ошибка: не смогли найти файл или папку
+				return unserializeObj
+			else return nil, 'Cannot unserialize data into object ("'..pathToFile..'")' end -- Ошибка: не смогли десерелизировать данные
+		else return nil, 'Cannot open a file ("'..pathToFile..'")' end -- Ошибка: не смогли открыть файл
+	else return nil, 'Folder or file ("'..pathToFile..'") does not exists' end -- Ошибка: не смогли найти файл или папку
 end
 
 -- Функция записи данных
@@ -117,7 +110,6 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
     local curdir = shell.dir() .. "/"
 	local compLabel = os.getComputerLabel()
 	local userProgTable = {}
-	local isUserProg = false
 
 	if branch == nil then -- Если в аргументах не была указана ветка, то устанавливается значение по умолчанию, "master"
         branch = "master"
@@ -151,7 +143,6 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 	if fs.exists("deleteFolder_" .. defaultFolderName) then shell.run("delete", "deleteFolder_" .. defaultFolderName) end
 	local renameStatus
 	if fs.exists(defaultFolderName) then renameStatus = shell.run("rename", defaultFolderName, "deleteFolder_" .. defaultFolderName) end -- Переименовываем старую папку, для последующего удаления
-	print("RENAME STATUSS", renameStatus) --DEBUG
 
 	-- Назначение метки для ПК, если нужно
 	if compLabel == nil then -- Если в пк нет метки, то ...
@@ -163,9 +154,9 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 		local tempCompLabel = fReadData(compLabel)
 		if tempCompLabel == nil then print("Incorrect label name, please enter again: ") else compLabel = tempCompLabel end
 	until tempCompLabel ~= nil
-	print("COMP LABEL", compLabel) --DEBUG
 	os.setComputerLabel(compLabel)
 
+	local isUserProg = false
 	-- Клонирование нужных файлов с репозитория на ПК
 	for fTag, fName in string.gmatch(instrList_File, '#(.-)="(.-)"') do -- Читай и испольняем некоторые с файла инструкции
 		if (fTag == "!") or (fTag == "Service") or (fTag == "File") then -- Если после ключевого символа "#" есть ("!" или "Service" или "File") то это служебные прогаммы и должны быть установлены везде
@@ -211,17 +202,18 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 		os.queueEvent("settings_driver_in", nil, "stop") -- Приостанавливаем роботу драйвера настроек, если он работает, и
 		sleep(1) -- ждём 1 секунду, чтобы он завершился
 		print("Test after STOP")  --DEBUG
-		local status, errMsg, tSettings = unerelObj(curdir .. "deleteFolder_" .. defaultFolderName .. settingsList_Name) -- Пробуем десерилизировать данные с файла настройки
-		if ((status) and (tSettings.S_pinProgramm ~= nil) and false) then -- Если данные серилизировались и в таблице есть данные программы, то ...
+
+		local tSettings, errMsg = unserelObj(curdir .. "deleteFolder_" .. defaultFolderName .. settingsList_Name) -- Пробуем десерилизировать данные с файла настройки
+
+		if ((tSettings ~= nil) and (tSettings.S_pinProgramm ~= nil) and false) then -- Если данные серилизировались и в таблице есть данные программы, то ...
 			print(' - The selected program for this PC is: "' .. tSettings.S_pinProgramm .. '".')
 			sDefaultProgramm = tSettings.S_pinProgramm
-			--local writeStatus, errMsgWrite = writeFileandObj(tSettings, curdir, repoPath, defaultFolderName) -- Запись в файлы
 		else -- Если нет, то делаем новый настроечный файл
 			if errMsg == nil then errMsg = "" end
-			print(' - Error: "' .. errMsg .. '". Select a program number from the list below, or:\n  - 0 to skip;\n  - -1 to download all programs.')
+			print(' - Error: "' .. errMsg .. '". Select a program number from the list below, or 0 to skip:')
 		end
 
-		 ---Выводим список программ
+		 ---Вивід списку програм
 		local _, nDisplayHight = term.getSize()
 		for k, v in pairs(userProgTable) do
 			local _, nCursPosY = term.getCursorPos() -- Позиция где курсор БУДЕТ ПЕЧАТАТЬ
@@ -234,16 +226,18 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 				term.clearLine() -- Очищаем строку на которой біла подсказка
 				term.setCursorPos(1, nDisplayHight) -- Ставим курсов в начало последней строки
 			end
-			print(" ["..k.."] ".."Name: "..v.kProgName) -- Подобно "print()", но если нету места на дисплее, то оно позволит вам увидеть весь список
+			print(" ["..k.."] ".."Name: "..v.kProgName)
 		end
 
 		---Очікуємо вводу користувача, або значення за замовчуванням
+		local inputValue
 		repeat -- Цыкли с после-условием для проверки введеного значения
 			write("\n> ")
-			inputValue = tonumber(fReadData("0"))
+			inputValue = tonumber(fReadData("0", 3))
 			if ((inputValue > #userProgTable) and (inputValue < 0)) then print("Please enter again: ") end
 		until ((inputValue <= #userProgTable) and (inputValue >= 0))
 
+		-- Виконання вибраних користувачем дій
 		if inputValue > 0 then
 			local content = {S_pinProgramm = userProgTable[inputValue].kProgName, S_pinPathGit = userProgTable[inputValue].kPath, S_pinStartArgs = userProgTable[inputValue].kStartupArgs} -- Новая таблица с данными, S - значить сервисные данные
 
@@ -263,5 +257,5 @@ end
 
 -- Непосредственный запуск "распаковки" среды с GitHub
 local args = {...}
-print("#Name: deploy.lua# || #Version: 2.1.4.7#\n")
+print("#Name: deploy.lua# || #Version: 2.2.1#\n")
 clone(args[1], args[2])

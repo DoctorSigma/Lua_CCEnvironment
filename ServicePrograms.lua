@@ -61,8 +61,9 @@ end
 function tFunctionLists.getSettings(sTableLabel, nDefaultTime) --> operResContent(string), errorMsg(string)
     expect.expect(1, sTableLabel, "string")
     expect.expect(2, nDefaultTime, "number", "nil")
-    if nDefaultTime == nil then nDefaultTime = 5 end -- Если пользователь не указал максимальное время, то оно равно значению по умолчанию
-    if nDefaultTime <= 0 then return nil, "not correct timer time" end -- Если значение для таймера неверное
+
+    if ((nDefaultTime == nil) or (nDefaultTime < 0)) then nDefaultTime = 3 end -- Если пользователь не указал максимальное время, то оно равно значению по умолчанию
+
     local nRequestId = os.startTimer(nDefaultTime) -- Запускаем таймер, который будет служить ID, и непосредственно таймером
 
     --Отдача команды и ожидание ответа
@@ -83,8 +84,9 @@ function tFunctionLists.setSettings(sTableLabel, sTableValue, nDefaultTime) --> 
     expect.expect(1, sTableLabel, "string")
     expect.expect(2, sTableValue, "string")
     expect.expect(3, nDefaultTime, "number", "nil")
-    if nDefaultTime == nil then nDefaultTime = 5 end -- Если пользователь не указал максимальное время, то оно равно значению по умолчанию
-    if nDefaultTime <= 0 then return false, "not correct timer time" end -- Если значение для таймера неверное
+
+    if ((nDefaultTime == nil) or (nDefaultTime < 0)) then nDefaultTime = 3 end -- Если пользователь не указал максимальное время, то оно равно значению по умолчанию
+
     local nRequestId = os.startTimer(nDefaultTime) -- Запускаем таймер, который будет служить ID, и непосредственно таймером
 
     --Отдача команды и ожидание ответа
@@ -101,21 +103,25 @@ function tFunctionLists.setSettings(sTableLabel, sTableValue, nDefaultTime) --> 
 end
 
 --Функция считывание данных с клавиатуры за n секунд, или возвращения значение по умолчанию
-function tFunctionLists.fReadData(defaultValue) --> status(bool), errorMsg(string), content(string)
+function tFunctionLists.fReadData(defaultValue, nTimerTime) -->  --> content(string) | nil, nil | errorMsg(string)
     expect.expect(1, defaultValue, "string", "nil")
+    expect.expect(2, nTimerTime, "number", "nil")
 
-    local nTimerId = os.startTimer(3)--запускаем таймер на 3 секунды и сохраняем его ИД
+    if ((nTimerTime == nil) or (nTimerTime < 0)) then nTimerTime = 3 end
+
+    local nTimerId = os.startTimer(nTimerTime)--запускаем таймер на 3 секунды и сохраняем его ИД
     while true do
         local sEventName, eventArgs = os.pullEvent()
         if ((sEventName == "timer") and (eventArgs == nTimerId) and (defaultValue ~= nil)) then -- Если таймер уже вышел и есть значение по умолчанию
-            return true, "", defaultValue
+            return defaultValue
         elseif ((sEventName == "char") and (eventArgs == ' ') and (defaultValue ~= nil)) then -- Или мы нажали на пробел и есть значение по умолчанию
-            return true, "", defaultValue
+            return defaultValue
         elseif ((sEventName == "char") and (eventArgs ~= ' ')) then -- Или ввели что-то другое
             write(">")
-            return true, "", read(nil, nil, nil, eventArgs)
+            return read(nil, nil, nil, eventArgs)
         end
     end
+    return nil, "EoF"
 end
 
 -- Функция получения напрвления для черепахи
