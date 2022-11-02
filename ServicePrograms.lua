@@ -124,6 +124,15 @@ function tFunctionLists.fReadData(defaultValue, nTimerTime) --> content(string),
     return nil, "EoF"
 end
 
+-- Функція отримання двох найменшу і найбільшу точки області
+function tFunctionLists.getAreaCoord(vPos1, vPos2) --> vMinPos(vector), vMaxPos(vector), nil, errorMsg(string)
+    expect.expect(1, vPos1, "table")
+    expect.expect(2, vPos2, "table")
+    local vMinPos = vector.new(math.min(vPos1.x, vPos2.x), math.min(vPos1.y, vPos2.z), math.min(vPos1.z, vPos2.z))
+    local vMaxPos = vector.new(math.max(vPos1.x, vPos2.x), math.max(vPos1.y, vPos2.z), math.max(vPos1.z, vPos2.z))
+    return vMinPos, vMaxPos, nil
+end
+
 -- Функція отримання напрямку черепахи
 function tFunctionLists.getTurtleDirection() --> direction(vector), nil | errorMsg(string), nil -- No change position
 	local i = 1 -- Счётчик цыкла
@@ -185,7 +194,7 @@ function tFunctionLists.setTurtleLeft(vDirection) --> NowDirection(vector), nil 
 end
 
 -- Функция поиска пути к определенным координатам
-function tFunctionLists.goToGps(vDirection, allowDig) --> errorMsg(string) | nil, NowDirection(vector)
+function tFunctionLists.goToGps(vDirection, allowDig) --> NowDirection(vector), nil | errorMsg(string)
     expect.expect(1, vDirection, "table")
     expect.expect(2, allowDig, "boolean", "nil")
 
@@ -271,5 +280,5 @@ function tFunctionLists.goToGps(vDirection, allowDig) --> errorMsg(string) | nil
     
 end
 
-print("#Name: ServicePrograms.lua# || #Version: 2.1.3#\n")
+print("#Name: ServicePrograms.lua# || #Version: 2.2.1#\n")
 return(tFunctionLists) -- Возвращает таблицу, в которой находятся функции.
