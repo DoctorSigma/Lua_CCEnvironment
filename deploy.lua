@@ -163,7 +163,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 			--TODO: использовать функцию, которая будет посылать данные в консоль, и откправлять на базу, и на КПК
 			print("Receiving: ", fName)
             local content, ok = _GET(repoPath .. fName)
-            if not ok then print(" ..unexisted") else
+            if ok then print(" ..unexisted") else
 				local instalDir = ((fTag == "!") and ("") or (defaultFolderName)) -- "Тернарный оператор", конструктция:(s = condition ? "true" : "false"), пояснение: оператор "and" возвращает первое ложное значение среди сових операндов; если оба операнда истинны, возвращается последний из них, а оператор "or" возвращает первое истинное значение среди своих операндов; если оба операнда ложны, возвращается последний из них
 																				  -- Если "!", то не нужно перемещать файл в подпапку, но если "Service", то нужно переместить в папку по умолчанию
 				local fout = fs.open(curdir .. instalDir .. fName, "w")
@@ -180,7 +180,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
 				if progName == compLabel and false then -- Если есть приложение с таким же названием как и пк, то ..
 					print("\nReceiving user programm: ", fPath)
 					local content, ok = _GET(repoPath .. fPath)
-					if not ok then print(" ..unexisted") else
+					if ok then print(" ..unexisted") else
 						local fout = fs.open(curdir .. defaultFolderName .. progName .. ".lua", "w")
 						fout.write(content)
 						fout.close()
@@ -257,5 +257,5 @@ end
 
 -- Непосредственный запуск "распаковки" среды с GitHub
 local args = {...}
-print("#Name: deploy.lua# || #Version: 2.2.2#\n")
+print("#Name: deploy.lua# || #Version: 2.2.3#\n")
 clone(args[1], args[2])
