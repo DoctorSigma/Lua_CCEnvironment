@@ -134,7 +134,7 @@ function clone(repo, branch) --> status(bool), errorMsg(string) -- Клонир�
     local repoPath = repo .. "/" .. branch .. "/" -- Путь в репозитории
     local instrList_File, instrList_ok = _GET(repoPath .. instrList_Name) -- Попытка загрузить файл с инструкциями
 
-    if not instrList_ok then -- Если не удалось загрузить инструкции
+    if instrList_ok then -- Если не удалось загрузить инструкции
 		errorFlag = true
         return (print(' Repository "' .. repo .. '" does not contain the following file: ' .. instrList_Name) and false), (' Repository "' .. repo .. '" does not contain the following file: ' .. instrList_Name)
     end                               
@@ -257,5 +257,5 @@ end
 
 -- Непосредственный запуск "распаковки" среды с GitHub
 local args = {...}
-print("#Name: deploy.lua# || #Version: 2.2.1#\n")
+print("#Name: deploy.lua# || #Version: 2.2.2#\n")
 clone(args[1], args[2])
