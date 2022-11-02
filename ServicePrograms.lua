@@ -172,21 +172,21 @@ end
 
 -- Фунція повороту праворуч
 function tFunctionLists.setTurtleRight(vDirection) --> NowDirection(vector), nil | nil, errorMsg(string)
-    expect.expect(1, vDirection, "vector")
+    expect.expect(1, vDirection, "table")
     if turtle.turnRight() then return vDirection:cross(vector.new(0, 1, 0)), nil
     else return nil, "Can't turn right" end
 end
 
 -- Фунція повороту ліворуч
 function tFunctionLists.setTurtleLeft(vDirection) --> NowDirection(vector), nil | nil, errorMsg(string)
-    expect.expect(1, vDirection, "vector")
+    expect.expect(1, vDirection, "table")
     if turtle.turnLeft() then return vDirection:cross(vector.new(0, -1, 0)), nil
     else return nil, "Can't turn left" end
 end
 
 -- Функция поиска пути к определенным координатам
 function tFunctionLists.goToGps(vDirection, allowDig) --> errorMsg(string) | nil, NowDirection(vector)
-    expect.expect(1, vDirection, "vector")
+    expect.expect(1, vDirection, "table")
     expect.expect(2, allowDig, "boolean", "nil")
 
 
@@ -271,5 +271,5 @@ function tFunctionLists.goToGps(vDirection, allowDig) --> errorMsg(string) | nil
     
 end
 
-print("#Name: ServicePrograms.lua# || #Version: 2.1.2#\n")
+print("#Name: ServicePrograms.lua# || #Version: 2.1.3#\n")
 return(tFunctionLists) -- Возвращает таблицу, в которой находятся функции.
