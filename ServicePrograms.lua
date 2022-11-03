@@ -226,11 +226,13 @@ function tFunctionLists.goInDirection(vDirection, vDirToDest, allowDig) --> dire
 end
 
 -- Функция поиска пути к определенным координатам
-function tFunctionLists.goToGPS(vDestPos, vDirection, allowDig) --> NowDirection(vector), nil | errorMsg(string)
+function tFunctionLists.goToGPS(vDestPos, vDirection, allowDig, fFuncAftMove) --> NowDirection(vector), nil | errorMsg(string)
     expect.expect(1, vDestPos, "table")
     expect.expect(2, vDirection, "table", "nil")
     expect.expect(3, allowDig, "boolean", "nil")
+    expect.expect(4, fFuncAftMove, "function", "nil")
     if not turtle then return vDirection, "Error: requires a Turtle" end -- Якщо функцією користується не "черепашка"
+    if fFuncAftMove == nil then fFuncAftMove = function(vDir) return vDir  end end
 
     if (vDirection == nil) then --Якщо не надано напрямок руху, то ...
         local vDir, isError = tFunctionLists.getTurtleDirection() -- пробуємо знайти це напрямок
@@ -253,8 +255,9 @@ function tFunctionLists.goToGPS(vDestPos, vDirection, allowDig) --> NowDirection
         vDirToDest = vDirToDest:round() -- Та заокруглюємо його
 
         vDirection = tFunctionLists.goInDirection(vDirection, vDirToDest, allowDig) -- Рухаємось в відповідну сторону
+        vDirection = fFuncAftMove(vDirection)
     end
 end
 
-print("#Name: ServicePrograms.lua# || #Version: 2.4.1#\n")
+print("#Name: ServicePrograms.lua# || #Version: 2.4.2#\n")
 return tFunctionLists -- Возвращает таблицу, в которой находятся функции
