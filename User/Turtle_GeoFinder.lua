@@ -6,7 +6,7 @@ local fService = require("ServicePrograms")
 local geoPeriphals = peripheral.wrap("right")
 local tArgs = { ... }
 
-print("#Name: Turtle_GeoFinder.lua# || #Version: 2.2.1#\n")
+print("#Name: Turtle_GeoFinder.lua# || #Version: 2.2.2#\n")
 
 if (#tArgs >= 1) and (geoPeriphals ~= nil) then -- Если в правой руке есть гео-сканер и было введено хотя бы один аргумент
     local tGeoScanRes, errMsg = geoPeriphals.scan(tonumber(tArgs[1]))
@@ -38,12 +38,12 @@ if (#tArgs >= 1) and (geoPeriphals ~= nil) then -- Если в правой ру
             if tArgs[2] == nil then tArgs[2] = "minecraft:ancient_debris" end
             for _, v in pairs(tGeoScanRes) do
                 if (v.name == tArgs[2]) then --если это второй аргумент, то
-                    textutils.pagedPrint("x:" .. (v.x + vPos.x) .. " y:" .. (v.y + vPos.y) .. " z:" .. (v.z + vPos.z))
+                    print("x:" .. (v.x + vPos.x) .. " y:" .. (v.y + vPos.y) .. " z:" .. (v.z + vPos.z))
                     vDir = fService.goToGPS(vector.new(v.x, v.y, v.z), vDir, true)
                 end
             end
 
-            vDir = fService.goToGPS(vPos - vInitDire, vDir, true) -- Повертаємось перед початковою позицією, щоб зберегти минулий напрямок руху
+            vDir = fService.goToGPS(vPos - vInitDire, vDir, true, function(vTDir) turtle.digUp() return vTDir end) -- Повертаємось перед початковою позицією, щоб зберегти минулий напрямок руху. Також вказуємо функцію, яка після приходу на будь-яку точку, зкопає верхній блок, щоб ми могли пройти
             vDir = fService.goToGPS(vPos, vDir, true) -- Повертаємось на початкову позицію
             turtle.select(16)
             turtle.equipRight()

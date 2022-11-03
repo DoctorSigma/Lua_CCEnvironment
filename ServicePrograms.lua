@@ -204,9 +204,9 @@ function tFunctionLists.goInDirection(vDirection, vDirToDest, allowDig) --> dire
 
     -- Рухаємось у вказаному напрямку
     if vDirToDest.y > 0 then -- Якщо потрібно рухатись вверх
-        turtle.up()
+        if not turtle.up() then if allowDig then turtle.digUp() end end --Якщо не вдалось пройти вверх, то якщо є дозвіл на копання, то копаємо вверх
     elseif vDirToDest.y < 0 then -- Якщо потрібно рухатись вниз
-        turtle.down()
+        if not turtle.down() then if allowDig then turtle.digDown() end end --Якщо не вдалось пройти вниз, то якщо є дозвіл на копання, то копаємо вниз
     else
         if math.abs(vDirToDest.x) == math.abs(vDirToDest.z) then vDirToDest.z = 0 end -- якщо потрібно рухатись по діагоналі, то пріоритетом є вісь X
         if not vDirection:equals(vDirToDest) then -- Якщо ми дивимось не в правильному напрямку, то крутимо "черепашку" в правильний напрямок
@@ -219,7 +219,7 @@ function tFunctionLists.goInDirection(vDirection, vDirToDest, allowDig) --> dire
                 vDirection = tFunctionLists.goTurtleRight(vDirection)
             end
         end
-        turtle.forward()
+        if not turtle.forward() then if allowDig then turtle.dig() end end --Якщо не вдалось пройти вперед, то якщо є дозвіл на копання, то копаємо вперед
     end
 
     return vDirection, nil
@@ -259,5 +259,5 @@ function tFunctionLists.goToGPS(vDestPos, vDirection, allowDig, fFuncAftMove) --
     end
 end
 
-print("#Name: ServicePrograms.lua# || #Version: 2.4.2#\n")
+print("#Name: ServicePrograms.lua# || #Version: 2.4.3#\n")
 return tFunctionLists -- Возвращает таблицу, в которой находятся функции
