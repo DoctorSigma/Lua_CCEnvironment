@@ -202,7 +202,7 @@ function tFunctionLists.goInDirection(vDirection, vDirToDest, allowDig) --> dire
     expect.expect(3, allowDig, "boolean", "nil")
     if not turtle then return vDirection, "Error: requires a Turtle" end -- Якщо функцією користується не "черепашка"
 
-    print("DEBUG: 1  ", vDirToDest)
+    print("DEBUG: 1  ", vDirToDest:tostring())
     -- Рухаємось у вказаному напрямку
     if vDirToDest.y > 0 then -- Якщо потрібно рухатись вверх
         turtle.up()
@@ -213,7 +213,7 @@ function tFunctionLists.goInDirection(vDirection, vDirToDest, allowDig) --> dire
     else
         print("DEBUG: 13")
         if math.abs(vDirToDest.x) == math.abs(vDirToDest.z) then vDirToDest.z = 0 end -- якщо потрібно рухатись по діагоналі, то пріоритетом є вісь X
-        print("DEBUG: 2  ", vDirToDest)
+        print("DEBUG: 2  ", vDirToDest:tostring())
         if not vDirection:equals(vDirToDest) then -- Якщо ми дивимось не в правильному напрямку, то крутимо "черепашку" в правильний напрямок
             print("DEBUG: 20")
             if (vDirection:cross(vDirToDest)).y < 0 then -- Якщо верктор дивиться вниз, то повертаємо вправо
@@ -229,6 +229,7 @@ function tFunctionLists.goInDirection(vDirection, vDirToDest, allowDig) --> dire
             end
         end
         print("DEBUG: 3")
+        print("================================")
         sleep(1)
         turtle.forward()
     end
@@ -267,5 +268,5 @@ function tFunctionLists.goToGPS(vDestPos, vDirection, allowDig) --> NowDirection
     end
 end
 
-print("#Name: ServicePrograms.lua# || #Version: 2.3.7#\n")
+print("#Name: ServicePrograms.lua# || #Version: 2.3.8#\n")
 return tFunctionLists -- Возвращает таблицу, в которой находятся функции
