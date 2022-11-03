@@ -202,33 +202,33 @@ function tFunctionLists.goInDirection(vDirection, vDirToDest, allowDig) --> dire
     expect.expect(3, allowDig, "boolean", "nil")
     if not turtle then return vDirection, "Error: requires a Turtle" end -- Якщо функцією користується не "черепашка"
 
-    print("DEBUG: 1  ", vDirToDest:tostring())
+    print("DEBUG: 1  ", vDirection:tostring(), "  ", vDirToDest:tostring())
     -- Рухаємось у вказаному напрямку
     if vDirToDest.y > 0 then -- Якщо потрібно рухатись вверх
         turtle.up()
-        print("DEBUG: 11")
+        print("DEBUG: 11", vDirection:tostring(), "  ", vDirToDest:tostring())
     elseif vDirToDest.y < 0 then -- Якщо потрібно рухатись вниз
         turtle.down()
-        print("DEBUG: 12")
+        print("DEBUG: 12", vDirection:tostring(), "  ", vDirToDest:tostring())
     else
-        print("DEBUG: 13")
+        print("DEBUG: 13", vDirection:tostring(), "  ", vDirToDest:tostring())
         if math.abs(vDirToDest.x) == math.abs(vDirToDest.z) then vDirToDest.z = 0 end -- якщо потрібно рухатись по діагоналі, то пріоритетом є вісь X
-        print("DEBUG: 2  ", vDirToDest:tostring())
+        print("DEBUG: 2  ", vDirection:tostring(), "  ", vDirToDest:tostring())
         if not vDirection:equals(vDirToDest) then -- Якщо ми дивимось не в правильному напрямку, то крутимо "черепашку" в правильний напрямок
-            print("DEBUG: 20")
+            print("DEBUG: 20", vDirection:tostring(), "  ", vDirToDest:tostring())
             if (vDirection:cross(vDirToDest)).y < 0 then -- Якщо верктор дивиться вниз, то повертаємо вправо
-                print("DEBUG: 21")
+                print("DEBUG: 21", vDirection:tostring(), "  ", vDirToDest:tostring())
                 vDirection = tFunctionLists.goTurtleRight(vDirection)
             elseif (vDirection:cross(vDirToDest)).y > 0 then -- Якщо верктор дивиться вверх, то повертаємо вліво
-                print("DEBUG: 23")
+                print("DEBUG: 23", vDirection:tostring(), "  ", vDirToDest:tostring())
                 vDirection = tFunctionLists.goTurtleLeft(vDirection)
             else -- Інакше, якщо вектор нульвоий, і ми дивись в не тому напрямку, то потрібно повернутися на 180
-                print("DEBUG: 24")
+                print("DEBUG: 24", vDirection:tostring(), "  ", vDirToDest:tostring())
                 vDirection = tFunctionLists.goTurtleRight(vDirection)
                 vDirection = tFunctionLists.goTurtleRight(vDirection)
             end
         end
-        print("DEBUG: 3")
+        print("DEBUG: 3", vDirection:tostring(), "  ", vDirToDest:tostring())
         print("================================")
         sleep(1)
         turtle.forward()
@@ -268,5 +268,5 @@ function tFunctionLists.goToGPS(vDestPos, vDirection, allowDig) --> NowDirection
     end
 end
 
-print("#Name: ServicePrograms.lua# || #Version: 2.3.8#\n")
+print("#Name: ServicePrograms.lua# || #Version: 2.3.9#\n")
 return tFunctionLists -- Возвращает таблицу, в которой находятся функции
