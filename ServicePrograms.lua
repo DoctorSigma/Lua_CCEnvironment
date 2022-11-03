@@ -1,6 +1,3 @@
---- ServicePrograms
---- Version: 2.1.3
-
 local tFunctionLists = {} -- Таблица в которую будут добавлены функции, чтобы добавить напише TABLE_NAME.FUNC_NAME() возле имени функции.
 local expect = require "cc.expect"
 local defaultFolderName = "CCEnv/"
@@ -212,12 +209,12 @@ function tFunctionLists.goInDirection(vDirection, vDirToDest, allowDig) --> dire
         if math.abs(vDirToDest.x) == math.abs(vDirToDest.z) then vDirToDest.z = 0 end -- якщо потрібно рухатись по діагоналі, то пріоритетом є вісь X
         if not vDirection:equals(vDirToDest) then -- Якщо ми дивимось не в правильному напрямку, то крутимо "черепашку" в правильний напрямок
             if (vDirection:cross(vDirToDest)).y < 0 then -- Якщо верктор дивиться вниз, то повертаємо вправо
-                vDirection = goTurtleRight(vDirection)
+                vDirection = tFunctionLists.goTurtleRight(vDirection)
             elseif (vDirection:cross(vDirToDest)).y > 0 then -- Якщо верктор дивиться вверх, то повертаємо вліво
-                vDirection = goTurtleLeft(vDirection)
+                vDirection = tFunctionLists.goTurtleLeft(vDirection)
             else -- Інакше, якщо вектор нульвоий, і ми дивись в не тому напрямку, то потрібно повернутися на 180
-                vDirection = goTurtleRight(vDirection)
-                vDirection = goTurtleRight(vDirection)
+                vDirection = tFunctionLists.goTurtleRight(vDirection)
+                vDirection = tFunctionLists.goTurtleRight(vDirection)
             end
         end
         turtle.forward()
@@ -234,7 +231,7 @@ function tFunctionLists.goToGps(vDestPos, vDirection, allowDig) --> NowDirection
     if not turtle then return vDirection, "Error: requires a Turtle" end -- Якщо функцією користується не "черепашка"
 
     if (vDirection == nil) then --Якщо не надано напрямок руху, то ...
-        local vDir, isError = getTurtleDirection() -- пробуємо знайти це напрямок
+        local vDir, isError = tFunctionLists.getTurtleDirection() -- пробуємо знайти це напрямок
         if isError then return vDirection, "Can't get direction: " .. isError end -- якщо ми його не знайшли, то завершуємо функцію
         vDirection = vDir -- інакше присвоюємо отриманий напрямок руху
     end
@@ -253,9 +250,9 @@ function tFunctionLists.goToGps(vDestPos, vDirection, allowDig) --> NowDirection
         vDirToDest = vDirToDest:normalize() -- Нормалізовуємо вектор
         vDirToDest = vDirToDest:round() -- Та заокруглюємо його
 
-        moveInDirection(vDirection, vDirToDest, allowDig) -- Рухаємось в відповідну сторону
+        tFunctionLists.moveInDirection(vDirection, vDirToDest, allowDig) -- Рухаємось в відповідну сторону
     end
 end
 
-print("#Name: ServicePrograms.lua# || #Version: 2.3.1#\n")
+print("#Name: ServicePrograms.lua# || #Version: 2.3.2#\n")
 return(tFunctionLists) -- Возвращает таблицу, в которой находятся функции.
