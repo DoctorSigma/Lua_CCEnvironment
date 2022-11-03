@@ -131,7 +131,8 @@ function tFunctionLists.getAreaCoord(vPos1, vPos2) --> vMinPos(vector), vMaxPos(
 end
 
 -- Функція отримання напрямку черепахи
-function tFunctionLists.getTurtleDirection() --> direction(vector) | nil, nil | errorMsg(string) -- No change position
+function tFunctionLists.getTurtleDirection(allowDig) --> direction(vector) | nil, nil | errorMsg(string) -- No change position
+    expect.expect(1, allowDig, "boolean", "nil")
     if not turtle then return nil, "Error: requires a Turtle" end -- Якщо функцією користується не "черепашка"
 	local i = 1 -- Счётчик цыкла
 	local h = 0 -- Счётчик относительной высоты
@@ -141,6 +142,7 @@ function tFunctionLists.getTurtleDirection() --> direction(vector) | nil, nil | 
 	if xPos == nil then return nil, "I can't find gps!!!(start)" end -- Если не смогли определить местоположение
     -- Пробуем двигатся вперёд
 	while not turtle.forward() do -- Если черепах не смогла двинуться вперёд, то ...
+        if allowDig then turtle.dig() end -- якщо є дозвіл, то копаємо перед собою блок
 		if math.fmod(i, 4) == 0 then -- Если мы пробовали пройти вперёд уже 4 раза, то ..
 			i = 1 -- "обнуляем" счётчик
 			if turtle.up() then -- Если мы сможем поднятся вверх, то..
@@ -254,5 +256,5 @@ function tFunctionLists.goToGPS(vDestPos, vDirection, allowDig) --> NowDirection
     end
 end
 
-print("#Name: ServicePrograms.lua# || #Version: 2.3.3#\n")
+print("#Name: ServicePrograms.lua# || #Version: 2.3.4#\n")
 return(tFunctionLists) -- Возвращает таблицу, в которой находятся функции.
