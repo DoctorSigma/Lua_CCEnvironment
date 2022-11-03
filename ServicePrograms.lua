@@ -128,13 +128,14 @@ end
 function tFunctionLists.getAreaCoord(vPos1, vPos2) --> vMinPos(vector), vMaxPos(vector), nil, errorMsg(string)
     expect.expect(1, vPos1, "table")
     expect.expect(2, vPos2, "table")
-    local vMinPos = vector.new(math.min(vPos1.x, vPos2.x), math.min(vPos1.y, vPos2.z), math.min(vPos1.z, vPos2.z))
-    local vMaxPos = vector.new(math.max(vPos1.x, vPos2.x), math.max(vPos1.y, vPos2.z), math.max(vPos1.z, vPos2.z))
+    local vMinPos = vector.new(math.min(vPos1.x, vPos2.x), math.min(vPos1.y, vPos2.y), math.min(vPos1.z, vPos2.z))
+    local vMaxPos = vector.new(math.max(vPos1.x, vPos2.x), math.max(vPos1.y, vPos2.y), math.max(vPos1.z, vPos2.z))
     return vMinPos, vMaxPos, nil
 end
 
 -- Функція отримання напрямку черепахи
-function tFunctionLists.getTurtleDirection() --> direction(vector), nil | errorMsg(string), nil -- No change position
+function tFunctionLists.getTurtleDirection() --> direction(vector) | nil, nil | errorMsg(string) -- No change position
+    if not turtle then return nil, "Error: requires a Turtle" end -- Якщо функцією користується не "черепашка"
 	local i = 1 -- Счётчик цыкла
 	local h = 0 -- Счётчик относительной высоты
 	
@@ -180,105 +181,81 @@ function tFunctionLists.getTurtleDirection() --> direction(vector), nil | errorM
 end
 
 -- Фунція повороту праворуч
-function tFunctionLists.setTurtleRight(vDirection) --> NowDirection(vector), nil | nil, errorMsg(string)
+function tFunctionLists.goTurtleRight(vDirection) --> NowDirection(vector), nil | nil, errorMsg(string)
     expect.expect(1, vDirection, "table")
+    if not turtle then return vDirection, "Error: requires a Turtle" end -- Якщо функцією користується не "черепашка"
     if turtle.turnRight() then return vDirection:cross(vector.new(0, 1, 0)), nil
     else return nil, "Can't turn right" end
 end
 
 -- Фунція повороту ліворуч
-function tFunctionLists.setTurtleLeft(vDirection) --> NowDirection(vector), nil | nil, errorMsg(string)
+function tFunctionLists.goTurtleLeft(vDirection) --> NowDirection(vector), nil | nil, errorMsg(string)
     expect.expect(1, vDirection, "table")
+    if not turtle then return vDirection, "Error: requires a Turtle" end -- Якщо функцією користується не "черепашка"
     if turtle.turnLeft() then return vDirection:cross(vector.new(0, -1, 0)), nil
     else return nil, "Can't turn left" end
 end
 
--- Функция поиска пути к определенным координатам
-function tFunctionLists.goToGps(vDirection, allowDig) --> NowDirection(vector), nil | errorMsg(string)
+-- Функція встановлення напрямку руху черепахи
+function tFunctionLists.goInDirection(vDirection, vDirToDest, allowDig) --> direction(vector), nil | errorMsg(string), nil -- No change position
     expect.expect(1, vDirection, "table")
-    expect.expect(2, allowDig, "boolean", "nil")
+    expect.expect(2, vDirToDest, "table")
+    expect.expect(3, allowDig, "boolean", "nil")
+    if not turtle then return vDirection, "Error: requires a Turtle" end -- Якщо функцією користується не "черепашка"
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-    h=0 --набраная высота
-    
-    axisX,axisY=0,0                             --поворот по осям х,у
-    target=string.sub(com,2,#com)               --получение точки назначения
-    targetPos=textutils.unserialize(target)     --точка назначения
-    print("Call to "..targetPos[1]..", "..targetPos[2]..", "..targetPos[3])
-    
-    x,y,z=gps.locate(1)                 --выясняем местоположение
-    oldX=x oldZ=z                       --сохраняем положение
- 
-    while not turtle.forward() do turtle.dig() end      --двигаемся для выяснения ориентации
-    os.sleep(1)
-    
-    x,y,z=gps.locate(1)                 --выясняем местоположение
-    
-    if x>oldX then axisX=1 elseif x<oldX then axisX=-1 end  --по изменении координат выясняем ориентацию
-    if z>oldZ then axisZ=1 elseif z<oldZ then axisZ=-1 end
-        
-    startX=x startY=y startZ=z          --стартовая точка движения
-    
-    dx=targetPos[1]-startX      --разница в кордах
-    dy=targetPos[2]-startY      --разница в кордах
-    dz=targetPos[3]-startZ      --разница в кордах
-    
-    dx=math.floor(dx)   --округляем
-    dy=math.floor(dy)   --округляем
-    dz=math.floor(dz)   --округляем
-    
-    if dy>0 then                            --если точка выше черепахи, то
-        for _ = 1, math.abs(dy) do
-            while not turtle.up() do turtle.digUp() end         --двигатся вверх
+    -- Рухаємось у вказаному напрямку
+    if vDirToDest.y > 0 then -- Якщо потрібно рухатись вверх
+        turtle.up()
+    elseif vDirToDest.y < 0 then -- Якщо потрібно рухатись вниз
+        turtle.down()
+    else
+        if math.abs(vDirToDest.x) == math.abs(vDirToDest.z) then vDirToDest.z = 0 end -- якщо потрібно рухатись по діагоналі, то пріоритетом є вісь X
+        if not vDirection:equals(vDirToDest) then -- Якщо ми дивимось не в правильному напрямку, то крутимо "черепашку" в правильний напрямок
+            if (vDirection:cross(vDirToDest)).y < 0 then -- Якщо верктор дивиться вниз, то повертаємо вправо
+                vDirection = goTurtleRight(vDirection)
+            elseif (vDirection:cross(vDirToDest)).y > 0 then -- Якщо верктор дивиться вверх, то повертаємо вліво
+                vDirection = goTurtleLeft(vDirection)
+            else -- Інакше, якщо вектор нульвоий, і ми дивись в не тому напрямку, то потрібно повернутися на 180
+                vDirection = goTurtleRight(vDirection)
+                vDirection = goTurtleRight(vDirection)
+            end
         end
-    elseif dy<0 then                        --иначе если точка ниже, то
-        for _ = 1, math.abs(dy) do
-            while not turtle.down() do turtle.digDown() end     --двигатся вниз
-        end
+        turtle.forward()
     end
-    
-    if ((axisX<0) and (dx>0)) or ((axisX>0) and (dx<0)) then turtle.turnLeft() turtle.turnLeft() axisX=1 elseif         --поворачиваем в нужную сторону
-            (axisZ>0) and (dx>0) then turtle.turnLeft() axisZ=0 axisX=1 elseif
-                (axisZ>0) and (dx<0) then turtle.turnRight() axisZ=0 axisX=-1 elseif
-                    (axisZ<0) and (dx<0) then turtle.turnLeft() axisZ=0 axisX=-1 elseif
-                        (axisZ<0) and (dx>0) then turtle.turnRight() axisZ=0 axisX=1 
-            
-    end
- 
-    
-    for _ =1, math.abs(dx) do                --двигаемся по оси х
-        if (turtle.detect()) and not (turtle.detectUp()) and (h<10) then turtle.up() h=h+1 else     --если спереди препятсвие, сверху нет препятсвия и набранная высота<10 то поднятся вверх и h+1
-        while not turtle.forward() do turtle.dig()  end end
-        
-    end
-    
-    if (axisX>0) and (dz<0) then turtle.turnLeft()  elseif  --поворачиваем в нужную сторону
-            (axisX>0) and (dz>0) then turtle.turnRight() elseif
-                (axisX<0) and (dz>0) then turtle.turnLeft()  elseif
-                    (axisX<0) and (dz<0) then turtle.turnRight() end
-    
-    for _ =1,  math.abs(dz) do
-        if (turtle.detect()) and not (turtle.detectUp()) and (h<10) then turtle.up() h=h+1 else
-        while not turtle.forward() do turtle.dig() end end
-    end 
-    
-    for _ =1,h do
-        while not turtle.down() do turtle.digDown() end
-    end
-    
+
+    return vDirection, nil
 end
 
-print("#Name: ServicePrograms.lua# || #Version: 2.2.1#\n")
+-- Функция поиска пути к определенным координатам
+function tFunctionLists.goToGps(vDestPos, vDirection, allowDig) --> NowDirection(vector), nil | errorMsg(string)
+    expect.expect(1, vDestPos, "table")
+    expect.expect(2, vDirection, "table", "nil")
+    expect.expect(3, allowDig, "boolean", "nil")
+    if not turtle then return vDirection, "Error: requires a Turtle" end -- Якщо функцією користується не "черепашка"
+
+    if (vDirection == nil) then --Якщо не надано напрямок руху, то ...
+        local vDir, isError = getTurtleDirection() -- пробуємо знайти це напрямок
+        if isError then return vDirection, "Can't get direction: " .. isError end -- якщо ми його не знайшли, то завершуємо функцію
+        vDirection = vDir -- інакше присвоюємо отриманий напрямок руху
+    end
+
+    local vCurPos
+    while (true) do
+        if true then -- Визначаємо наші координати
+            local xPos, yPos, zPos = gps.locate(1)
+            if xPos == nil then return vDirection, "I can't find gps!!!" end -- Якщо не змогли отримати координати
+            vCurPos = vector.new(xPos, yPos, zPos)
+        end
+
+        if (vCurPos:equals(vDestPos)) or ((math.abs((vDestPos - vCurPos).x) + math.abs((vDestPos - vCurPos).y) + math.abs((vDestPos - vCurPos).z)) == 1 and not allowDig) then return vDirection, nil end --Якщо ми в точці призначення, або біля цієї точки і немає дозволу на копання.
+
+        vDirToDest = vDestPos - vCurPos -- Визначаємо напрямок для руху
+        vDirToDest = vDirToDest:normalize() -- Нормалізовуємо вектор
+        vDirToDest = vDirToDest:round() -- Та заокруглюємо його
+
+        moveInDirection(vDirection, vDirToDest, allowDig) -- Рухаємось в відповідну сторону
+    end
+end
+
+print("#Name: ServicePrograms.lua# || #Version: 2.3.1#\n")
 return(tFunctionLists) -- Возвращает таблицу, в которой находятся функции.
