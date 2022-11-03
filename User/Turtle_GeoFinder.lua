@@ -6,7 +6,7 @@ local fService = require("ServicePrograms")
 local geoPeriphals = peripheral.wrap("right")
 local tArgs = { ... }
 
-print("#Name: Turtle_GeoFinder.lua# || #Version: 2.2.3#\n")
+print("#Name: Turtle_GeoFinder.lua# || #Version: 2.2.4#\n")
 
 if (#tArgs >= 1) and (geoPeriphals ~= nil) then -- Если в правой руке есть гео-сканер и было введено хотя бы один аргумент
     local tGeoScanRes, errMsg = geoPeriphals.scan(tonumber(tArgs[1]))
@@ -38,8 +38,8 @@ if (#tArgs >= 1) and (geoPeriphals ~= nil) then -- Если в правой ру
             if tArgs[2] == nil then tArgs[2] = "minecraft:ancient_debris" end
             for _, v in pairs(tGeoScanRes) do
                 if (v.name == tArgs[2]) then --если это второй аргумент, то
-                    local dest = vector.new(v.x, v.y, v.z)
-                    print("x:" .. (v.x + vPos.x) .. " y:" .. (v.y + vPos.y) .. " z:" .. (v.z + vPos.z) .. "[GOTO: " .. dest:tostring() .."]")
+                    local dest = vector.new((v.x + vPos.x), (v.y + vPos.y), (v.z + vPos.z))
+                    print("x:" .. dest.x .. " y:" .. dest.y .. " z:" .. dest.Z .. "[GOTO:" .. dest:tostring() .."]")
                     vDir = fService.goToGPS(dest, vDir, true, function(vTDir) turtle.digUp() return vTDir end)
                 end
             end
