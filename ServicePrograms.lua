@@ -202,23 +202,33 @@ function tFunctionLists.goInDirection(vDirection, vDirToDest, allowDig) --> dire
     expect.expect(3, allowDig, "boolean", "nil")
     if not turtle then return vDirection, "Error: requires a Turtle" end -- Якщо функцією користується не "черепашка"
 
+    print("DEBUG: 1")
     -- Рухаємось у вказаному напрямку
     if vDirToDest.y > 0 then -- Якщо потрібно рухатись вверх
         turtle.up()
+        print("DEBUG: 11")
     elseif vDirToDest.y < 0 then -- Якщо потрібно рухатись вниз
         turtle.down()
+        print("DEBUG: 12")
     else
+        print("DEBUG: 13")
         if math.abs(vDirToDest.x) == math.abs(vDirToDest.z) then vDirToDest.z = 0 end -- якщо потрібно рухатись по діагоналі, то пріоритетом є вісь X
+        print("DEBUG: 2")
         if not vDirection:equals(vDirToDest) then -- Якщо ми дивимось не в правильному напрямку, то крутимо "черепашку" в правильний напрямок
+            print("DEBUG: 20")
             if (vDirection:cross(vDirToDest)).y < 0 then -- Якщо верктор дивиться вниз, то повертаємо вправо
+                print("DEBUG: 21")
                 vDirection = tFunctionLists.goTurtleRight(vDirection)
             elseif (vDirection:cross(vDirToDest)).y > 0 then -- Якщо верктор дивиться вверх, то повертаємо вліво
+                print("DEBUG: 23")
                 vDirection = tFunctionLists.goTurtleLeft(vDirection)
             else -- Інакше, якщо вектор нульвоий, і ми дивись в не тому напрямку, то потрібно повернутися на 180
+                print("DEBUG: 24")
                 vDirection = tFunctionLists.goTurtleRight(vDirection)
                 vDirection = tFunctionLists.goTurtleRight(vDirection)
             end
         end
+        print("DEBUG: 3")
         turtle.forward()
     end
 
@@ -252,9 +262,9 @@ function tFunctionLists.goToGPS(vDestPos, vDirection, allowDig) --> NowDirection
         vDirToDest = vDirToDest:normalize() -- Нормалізовуємо вектор
         vDirToDest = vDirToDest:round() -- Та заокруглюємо його
 
-        tFunctionLists.moveInDirection(vDirection, vDirToDest, allowDig) -- Рухаємось в відповідну сторону
+        tFunctionLists.goInDirection(vDirection, vDirToDest, allowDig) -- Рухаємось в відповідну сторону
     end
 end
 
-print("#Name: ServicePrograms.lua# || #Version: 2.3.5#\n")
-return(tFunctionLists) -- Возвращает таблицу, в которой находятся функции.
+print("#Name: ServicePrograms.lua# || #Version: 2.3.6#\n")
+return tFunctionLists -- Возвращает таблицу, в которой находятся функции
