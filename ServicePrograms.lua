@@ -142,20 +142,23 @@ function tFunctionLists.getTurtleDirection(allowDig) --> direction(vector) | nil
 	if xPos == nil then return nil, "I can't find gps!!!(start)" end -- Если не смогли определить местоположение
     -- Пробуем двигатся вперёд
 	while not turtle.forward() do -- Если черепах не смогла двинуться вперёд, то ...
-        if allowDig then turtle.dig() end -- якщо є дозвіл, то копаємо перед собою блок
-		if math.fmod(i, 4) == 0 then -- Если мы пробовали пройти вперёд уже 4 раза, то ..
-			i = 1 -- "обнуляем" счётчик
-			if turtle.up() then -- Если мы сможем поднятся вверх, то..
-				h = h + 1
-			elseif turtle.down() then -- Если мы не смогли поднятся вверх, но можем вниз, то ..
-				h = h - 1
-			else -- Мы не смогли никуда повернутся, ошибка
-				return nil, "I can't move anywhere!!"
-			end
-		else -- Если ещё не повернулись 4 раза, то ..		
-			turtle.turnRight()
-			i = i + 1
-		end
+        if allowDig then -- якщо є дозвіл, то копаємо перед собою блок
+            turtle.dig()
+        else
+            if math.fmod(i, 4) == 0 then -- Если мы пробовали пройти вперёд уже 4 раза, то ..
+                i = 1 -- "обнуляем" счётчик
+                if turtle.up() then -- Если мы сможем поднятся вверх, то..
+                    h = h + 1
+                elseif turtle.down() then -- Если мы не смогли поднятся вверх, но можем вниз, то ..
+                    h = h - 1
+                else -- Мы не смогли никуда повернутся, ошибка
+                    return nil, "I can't move anywhere!!"
+                end
+            else -- Если ещё не повернулись 4 раза, то ..
+                turtle.turnRight()
+                i = i + 1
+            end
+        end
 	end
 	
     -- Определям новое местоположение
@@ -258,5 +261,5 @@ function tFunctionLists.goToGPS(vDestPos, vDirection, allowDig, fFuncAftMove) --
     end
 end
 
-print("#Name: ServicePrograms.lua# || #Version: 2.4.4#\n")
+print("#Name: ServicePrograms.lua# || #Version: 2.4.5#\n")
 return tFunctionLists -- Возвращает таблицу, в которой находятся функции
