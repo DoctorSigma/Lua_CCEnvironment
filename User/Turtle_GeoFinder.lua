@@ -6,11 +6,12 @@ local fService = require("ServicePrograms")
 local geoPeriphals = peripheral.wrap("right")
 local tArgs = { ... }
 
-print("#Name: Turtle_GeoFinder.lua# || #Version: 2.3.1#\n")
+print("#Name: Turtle_GeoFinder.lua# || #Version: 2.3.2#\n")
 
 if #tArgs >= 1 then
     if geoPeriphals ~= nil then -- Если в правой руке есть гео-сканер
         if tArgs[3] == nil then tArgs[3] = "0" end -- Якщо третім аргументом не вказано к-сть повторів, то ставимо на 0
+        if tArgs[2] == "nil" then tArgs[2] = nil end
         for _ = 0, tonumber(tArgs[3]) do
             local tGeoScanRes, errMsg = geoPeriphals.scan(tonumber(tArgs[1]))
 
@@ -51,8 +52,9 @@ if #tArgs >= 1 then
                     vDir = fService.goToGPS(vPos, vDir, true, function(vTDir) turtle.digUp() return vTDir end) -- Повертаємось на початкову позицію
 
                     if tonumber(tArgs[3]) > 0 then -- Якщо потрібно зробити більше одного повтору, то ..., інакше нічого.
-                        print("================\nGo to next position: " .. vPos + (vInitDire * 32) .. "================\n")
-                        vDir = fService.goToGPS(vPos + (vInitDire * 32), vDir, true, function(vTDir) turtle.digUp() return vTDir end)
+                        local vNextPos = vPos + (vInitDire * 32)
+                        print("================\nGo to next position: " .. vNextPos:tostring() .. "================\n")
+                        vDir = fService.goToGPS(vNextPos, vDir, true, function(vTDir) turtle.digUp() return vTDir end)
                     end
 
                     turtle.select(16) -- Вибираємо слот, де лежить сканер
