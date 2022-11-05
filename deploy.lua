@@ -1,5 +1,5 @@
 local instrList_Name = "Instructions.txt"
-local settingsList_Name = "settings.txt"
+local localSettingsList_Name = "settings.txt"
 local prefix = "https://raw.githubusercontent.com/"
 local defaultFolderName = "CCEnv/"
 
@@ -91,7 +91,7 @@ function writeFileandObj(settingTable, curdir, repoPath) --> nil | isError(strin
 			fout.write(userFile)
 			fout.close()
 
-			local foutSett = fs.open(curdir .. defaultFolderName .. settingsList_Name, "w") -- Записываем в файл настроек настройки)
+			local foutSett = fs.open(curdir .. defaultFolderName .. localSettingsList_Name, "w") -- Записываем в файл настроек настройки)
 			foutSett.write(textutils.serialise(settingTable))
 			foutSett.close()
 
@@ -203,12 +203,14 @@ function clone(repo, branch) -->  isError(bool), isError(string) -- Клонир
 		sleep(1) -- ждём 1 секунду, чтобы он завершился
 		print("Test after STOP")  --DEBUG
 
-		local tSettings, errMsg = unserelObj(curdir .. "deleteFolder_" .. defaultFolderName .. settingsList_Name) -- Пробуем десерилизировать данные с файла настройки
+		local tSettings, errMsg = unserelObj(curdir .. "deleteFolder_" .. defaultFolderName .. localSettingsList_Name) -- Пробуем десерилизировать данные с файла настройки
 
 		if ((tSettings ~= nil) and (tSettings.S_pinProgramm ~= nil) and false) then -- Если данные серилизировались и в таблице есть данные программы, то ...
 			print(' - The selected program for this PC is: "' .. tSettings.S_pinProgramm .. '".')
 			sDefaultProgramm = tSettings.S_pinProgramm
+			--TODO: зробити перенесення локальних налаштувань
 		else -- Если нет, то делаем новый настроечный файл
+			--TODO: зробити створення нового файлу для локальних налаштувань
 			if errMsg == nil then errMsg = "" end
 			print(' - Error: "' .. errMsg .. '". Select a program number from the list below, or 0 to skip:')
 		end

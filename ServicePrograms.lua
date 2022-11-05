@@ -8,10 +8,10 @@ local defaultFolderName = "CCEnv/"
 --Функция драйвера настроек, которая последовательно будет исполнять команды
 function tFunctionLists.fSettingsDriver() --> funcStatus(boolean), returnMsg(string)
     local tSettingTable = {}
-    local settingsList_Name = "settings.txt"
+    local localSettingsList_Name = "settings.txt"
 
     -- Считывание предыдущих сохраненных настроек
-    local fin, _ = fs.open(defaultFolderName .. settingsList_Name, "r") -- Пробуем открыть файл c настройками
+    local fin, _ = fs.open(defaultFolderName .. localSettingsList_Name, "r") -- Пробуем открыть файл c настройками
     if fin ~= nil then -- если файл открылся
         local sContent = fin.readAll() -- Читаем таблицу с файла
         fin.close()
@@ -33,14 +33,14 @@ function tFunctionLists.fSettingsDriver() --> funcStatus(boolean), returnMsg(str
         elseif ((eventCommand == "set")) then -- Или нужно установить данные
             tSettingTable[eventTableId] = eventArgs
             local bErrorFlag = false
-            local fout, _ = fs.open(defaultFolderName .. "temp" .. settingsList_Name, "w") -- Пробуем открыть файл c настройками
+            local fout, _ = fs.open(defaultFolderName .. "temp" .. localSettingsList_Name, "w") -- Пробуем открыть файл c настройками
             if fout ~= nil then --Если файл открылся
                 local seriObj = textutils.serialize(tSettingTable)
                 if seriObj ~= nil then
                     fout.write(seriObj)
                     fout.close()
-                    shell.run("delete", defaultFolderName .. settingsList_Name)
-                    if shell.run("rename", defaultFolderName .. "temp" .. settingsList_Name, defaultFolderName .. settingsList_Name) then bErrorFlag = true end
+                    shell.run("delete", defaultFolderName .. localSettingsList_Name)
+                    if shell.run("rename", defaultFolderName .. "temp" .. localSettingsList_Name, defaultFolderName .. localSettingsList_Name) then bErrorFlag = true end
                 else
                     fout.close()
                 end
@@ -229,7 +229,7 @@ function tFunctionLists.goInDirection(vDirection, vDirToDest, allowDig) --> dire
 end
 
 -- Функция поиска пути к определенным координатам
-function tFunctionLists.goToGPS(vDestPos, vDirection, allowDig, fFuncAftMove) --> NowDirection(vector), nil | errorMsg(string)
+function tFunctionLists.goToGPS(vDestPos, vDirection, allowDig, fFuncAftMove) -- fFuncAftMove(vDirection) return vDirection end --> NowDirection(vector), nil | errorMsg(string)
     expect.expect(1, vDestPos, "table")
     expect.expect(2, vDirection, "table", "nil")
     expect.expect(3, allowDig, "boolean", "nil")
@@ -237,7 +237,7 @@ function tFunctionLists.goToGPS(vDestPos, vDirection, allowDig, fFuncAftMove) --
     if not turtle then return vDirection, "Error: requires a Turtle" end -- Якщо функцією користується не "черепашка"
 
     if (vDirection == nil) then --Якщо не надано напрямок руху, то ...
-        local vDir, isError = tFunctionLists.getTurtleDirection() -- пробуємо знайти це напрямок
+        local vDir, isError = tFunctionLists.getTurtleDirection(allowDig) -- пробуємо знайти це напрямок
         if isError then return vDirection, "Can't get direction: " .. isError end -- якщо ми його не знайшли, то завершуємо функцію
         vDirection = vDir -- інакше присвоюємо отриманий напрямок руху
     end
