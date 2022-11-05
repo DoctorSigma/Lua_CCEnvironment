@@ -1,7 +1,3 @@
-if not computer then
-    printError("Error: requires a PC")
-end
-
 local nbtStorage = peripheral.find("nbtStorage")
 local variableStore = peripheral.find("variableStore")
 local tInternData = { altarCoord = { x = 0, y = 0, z = 0}, starlightCoor = {}}
@@ -10,7 +6,7 @@ local idHasItem = 0
 local fHasItemFlag = false
 local tArgs = { ... }
 
-print("#Name: PC_AstralInfuserCrafter_WithIntegrated.lua# || #Version: 1.1.1#\n")
+print("#Name: PC_AstralInfuserCrafter_WithIntegrated.lua# || #Version: 1.1.2#\n")
 
 if nbtStorage ~= nil then
     if variableStore ~= nil then
