@@ -1,12 +1,25 @@
 local nbtStorage = peripheral.find("nbtStorage")
 local variableStore = peripheral.find("variableStore")
-local tInternData = { altarCoord = { x = 0, y = 0, z = 0}, starlightCoor = {}}
+local tInternData = { altarCoord = {x = -95, y = 70, z = -457}, starlightCoor = {
+    {x = -95, y = 69, z = -459},
+    {x = -96, y = 69, z = -459},
+    {x = -97, y = 69, z = -458},
+    {x = -97, y = 69, z = -457},
+    {x = -97, y = 69, z = -456},
+    {x = -96, y = 69, z = -455},
+    {x = -95, y = 69, z = -455},
+    {x = -94, y = 69, z = -455},
+    {x = -93, y = 69, z = -456},
+    {x = -93, y = 69, z = -457},
+    {x = -93, y = 69, z = -458},
+    {x = -94, y = 69, z = -459}
+}}
 local tOutData = {targetCoord = {x = 0, y = 0, z = 0}, clickWithEmpty = true, clickOnAltar = true}
 local idHasItem = 0
 local fHasItemFlag = false
 local tArgs = { ... }
 
-print("#Name: PC_AstralInfuserCrafter_WithIntegrated.lua# || #Version: 1.1.2#\n")
+print("#Name: PC_AstralInfuserCrafter_WithIntegrated.lua# || #Version: 1.1.3#\n")
 
 if nbtStorage ~= nil then
     if variableStore ~= nil then
