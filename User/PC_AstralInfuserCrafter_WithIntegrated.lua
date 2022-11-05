@@ -19,10 +19,12 @@ local idHasItem = 0
 local fHasItemFlag = false
 local tArgs = { ... }
 
-print("#Name: PC_AstralInfuserCrafter_WithIntegrated.lua# || #Version: 1.1.3#\n")
+print("#Name: PC_AstralInfuserCrafter_WithIntegrated.lua# || #Version: 1.1.4#\n")
 
 if nbtStorage ~= nil then
     if variableStore ~= nil then
+        --TODO: забрати костиль, який виник через стару систему аргументыв запуску
+        if tArgs[1] == nil then tArgs[1] = "hasItem" end
         if #tArgs >= 1 then
             -- Знаходимо айді змінної "Has item"
             for k, v in pairs(variableStore.list()) do

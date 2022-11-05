@@ -174,6 +174,7 @@ function clone(repo, branch) -->  isError(bool), isError(string) -- Клонир
 			if not isUserProg then -- Нет установленой пользовательской программы
 				local _, _, fPath = string.find(fName, "sPath='(.-)'") -- Узнаем путь куда устанавливать программу
 				local _, _, fstartupArgs = string.find(fName, "sStartupArgs='(.-)'") -- Узнаем какие аргументы нужно вказывать в файлике с тартапом
+				--TODO: переробити систему аргументів запуску, або зчитувати, ну і відповідно записати, глобальні інструкції як таблицю з json файлу, або шось інше
 				local _, _, progName = string.find(fPath, "/(.-).lua") -- Извлекаем название программы
 				table.insert(userProgTable, {kProgName = progName, kPath = fPath, kStartupArgs = fstartupArgs})
 
