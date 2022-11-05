@@ -19,7 +19,7 @@ local idHasItem = 0
 local fHasItemFlag = false
 local tArgs = { ... }
 
-print("#Name: PC_AstralInfuserCrafter_WithIntegrated.lua# || #Version: 1.1.4#\n")
+print("#Name: PC_AstralInfuserCrafter_WithIntegrated.lua# || #Version: 1.1.5#\n")
 
 if nbtStorage ~= nil then
     if variableStore ~= nil then
@@ -49,17 +49,17 @@ if nbtStorage ~= nil then
                         tOutData.clickOnAltar = false
                         tOutData.clickWithEmpty = true  --Спочатку пробуємо забрати пустим відром звідти рідину
                         nbtStorage.writeTable(tOutData)
-                        sleep(0.5)
+                        sleep(1)
                         tOutData.clickWithEmpty = false --Ставимо рідину на місце тепер точно пустого місця
                         nbtStorage.writeTable(tOutData)
-                        sleep(0.5)
+                        sleep(1)
                     end
                     -- Робимо йдемо на точку алтаря
                     tOutData.targetCoord = tInternData.altarCoord
                     tOutData.clickWithEmpty = true
                     tOutData.clickOnAltar = true
                     nbtStorage.writeTable(tOutData)
-                    sleep(0.5)
+                    sleep(1)
                 end
             end
         else print('Usage:\n - "Has item" variable name') end
