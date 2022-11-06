@@ -15,7 +15,7 @@ local tArgs = { ... }
 if tArgs[1] == nil then tArgs[1] = "1" end  --TODO: забрати костиль, який виник через стару систему аргументів запуску
 local nLimit = tonumber(tArgs[1])
 
-print("#Name: TestTurtle.lua# || #Version: 1.1.3#\n")
+print("#Name: TestTurtle.lua# || #Version: 1.1.4#\n")
 
 if nLimit > 0 and nLimit <= 8 then
     if tArgs[2] == nil then tArgs[2] = "minecraft:oak_log" end --TODO: забрати костиль, який виник через стару систему аргументів запуску
@@ -32,11 +32,13 @@ if nLimit > 0 and nLimit <= 8 then
                     -- Беремо предмет з вхідного сундука
                     turtle.select(1)
                     repeat
+                        local j = 0
                         if #inputChest.list() == 0 then return "InputChest is empty" end
                         turtle.suck(1) -- Беремо вхідний матеріал з вхідного сундука
+                        j = j + 1
                         local collectItem = turtle.getItemDetail().name
-                        if collectItem ~= tArgs[2] then turtle.dropUp() end -- Викидаємо непотрібний предмет
-                    until collectItem == tArgs[2] -- Повторюємо поки не витягнемо потрібний предмет
+                        if collectItem ~= tArgs[2] then turtle.dropUp() j = j - 1 end -- Викидаємо непотрібний предмет
+                    until collectItem == tArgs[2] and j == nLimit -- Повторюємо поки не витягнемо потрібний предмет і ми не візьмемо необхідну к-сть матеріалу
 
                     -- Починаємо крафт
                     turtle.craft(nLimit) -- Крафтимо 4 * nLimit дошки
