@@ -15,8 +15,9 @@ local tArgs = { ... }
 if tArgs[1] == nil then tArgs[1] = "1" end  --TODO: забрати костиль, який виник через стару систему аргументів запуску
 local nLimit = tonumber(tArgs[1])
 
-print("#Name: TestTurtle.lua# || #Version: 1.1.5#\n")
+print("#Name: TestTurtle.lua# || #Version: 1.1.6#\n")
 
+print("Craft count at once: " .. tostring(nLimit))
 if nLimit > 0 and nLimit <= 8 then
     if tArgs[2] == nil then tArgs[2] = "minecraft:oak_log" end --TODO: забрати костиль, який виник через стару систему аргументів запуску
     if inputChest ~= nil then
