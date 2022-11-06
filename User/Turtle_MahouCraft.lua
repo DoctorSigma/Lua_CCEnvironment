@@ -15,7 +15,7 @@ local tArgs = { ... }
 if tArgs[1] == nil then tArgs[1] = "1" end  --TODO: забрати костиль, який виник через стару систему аргументів запуску
 local nLimit = tonumber(tArgs[1])
 
-print("#Name: TestTurtle.lua# || #Version: 1.1.6#\n")
+print("#Name: TestTurtle.lua# || #Version: 1.1.7#\n")
 
 print("Craft count at once: " .. tostring(nLimit))
 if nLimit > 0 and nLimit <= 8 then
@@ -32,8 +32,8 @@ if nLimit > 0 and nLimit <= 8 then
                 if outputChest.size() - #outputChest.list() > 2 * nLimit  then -- Якщо є місце для крафту всіх компоненітв, то ...
                     -- Беремо предмет з вхідного сундука
                     turtle.select(1)
+                    local j = 0
                     repeat
-                        local j = 0
                         if #inputChest.list() == 0 then return "InputChest is empty" end
                         turtle.suck(1) -- Беремо вхідний матеріал з вхідного сундука
                         j = j + 1
