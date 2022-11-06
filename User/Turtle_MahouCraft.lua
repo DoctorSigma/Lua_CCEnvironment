@@ -12,9 +12,10 @@ end
 local inputChest = peripheral.wrap("front")
 local outputChest = peripheral.wrap("bottom")
 local tArgs = { ... }
+if tArgs[1] == nil then tArgs[1] = "1" end  --TODO: забрати костиль, який виник через стару систему аргументів запуску
 local nLimit = tonumber(tArgs[1])
 
-print("#Name: TestTurtle.lua# || #Version: 1.1.1#\n")
+print("#Name: TestTurtle.lua# || #Version: 1.1.2#\n")
 
 if nLimit > 0 and nLimit <= 8 then
     if tArgs[2] == nil then tArgs[2] = "minecraft:oak_log" end --TODO: забрати костиль, який виник через стару систему аргументів запуску
