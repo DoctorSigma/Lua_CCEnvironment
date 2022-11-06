@@ -15,7 +15,7 @@ local tArgs = { ... }
 if tArgs[1] == nil then tArgs[1] = "1" end  --TODO: забрати костиль, який виник через стару систему аргументів запуску
 local nLimit = tonumber(tArgs[1])
 
-print("#Name: TestTurtle.lua# || #Version: 1.1.7#\n")
+print("#Name: TestTurtle.lua# || #Version: 1.1.8#\n")
 
 print("Craft count at once: " .. tostring(nLimit))
 if nLimit > 0 and nLimit <= 8 then
@@ -39,8 +39,7 @@ if nLimit > 0 and nLimit <= 8 then
                         j = j + 1
                         local collectItem = turtle.getItemDetail().name
                         if collectItem ~= tArgs[2] then turtle.dropUp() j = j - 1 end -- Викидаємо непотрібний предмет
-                        if j == nLimit then break end
-                    until collectItem == tArgs[2]  -- Повторюємо поки не витягнемо потрібний предмет і ми не візьмемо необхідну к-сть матеріалу
+                    until collectItem == tArgs[2] and j == nLimit  -- Повторюємо поки не витягнемо потрібний предмет і ми не візьмемо необхідну к-сть матеріалу
 
                     -- Починаємо крафт
                     turtle.craft(nLimit) -- Крафтимо 4 * nLimit дошки
