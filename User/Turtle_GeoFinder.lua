@@ -6,7 +6,7 @@ local fService = require("ServicePrograms")
 local geoPeriphals = peripheral.wrap("right")
 local tArgs = { ... }
 
-print("#Name: Turtle_GeoFinder.lua# || #Version: 2.3.5#\n")
+print("#Version: 2.3.5# || #Name: Turtle_GeoFinder.lua#\n")
 
 if #tArgs >= 1 then
     if geoPeriphals ~= nil then -- Если в правой руке есть гео-сканер

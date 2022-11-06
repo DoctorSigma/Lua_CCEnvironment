@@ -5,5 +5,5 @@ end
 local fService = require("ServicePrograms")
 local tArgs = { ... }
 
-print("#Name: TestPC.lua# || #Version: 2.3.5#\n")
+print("#Version: 2.3.5# || #Name: TestPC.lua#\n")
 

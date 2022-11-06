@@ -15,7 +15,7 @@ local tArgs = { ... }
 if tArgs[1] == nil then tArgs[1] = "1" end  --TODO: забрати костиль, який виник через стару систему аргументів запуску
 local nLimit = tonumber(tArgs[1])
 
-print("#Name: TestTurtle.lua# || #Version: 1.1.8#\n")
+print("#Version: 1.1.9# || #Name: TestTurtle.lua#\n")
 
 print("Craft count at once: " .. tostring(nLimit))
 if nLimit > 0 and nLimit <= 8 then
@@ -29,17 +29,20 @@ if nLimit > 0 and nLimit <= 8 then
             end
 
             while true do
-                if outputChest.size() - #outputChest.list() > 2 * nLimit  then -- Якщо є місце для крафту всіх компоненітв, то ...
+                if (outputChest.size() - #outputChest.list() > 2 * nLimit) then -- Якщо є місце для крафту всіх компонентів, то ...
                     -- Беремо предмет з вхідного сундука
                     turtle.select(1)
-                    local j = 0
+                    local itemToCraft = 0
                     repeat
-                        if #inputChest.list() == 0 then return "InputChest is empty" end
+                        if #inputChest.list() == 0 then -- якщо предметів уже немає
+                            if itemToCraft > 0 then nLimit = itemToCraft -- якщо ми взяли якісь предмети, то використаємо їх
+                            else return "InputChest is empty" end -- інакше завершуємо програму
+                        end
                         turtle.suck(1) -- Беремо вхідний матеріал з вхідного сундука
-                        j = j + 1
+                        itemToCraft = itemToCraft + 1
                         local collectItem = turtle.getItemDetail().name
-                        if collectItem ~= tArgs[2] then turtle.dropUp() j = j - 1 end -- Викидаємо непотрібний предмет
-                    until collectItem == tArgs[2] and j == nLimit  -- Повторюємо поки не витягнемо потрібний предмет і ми не візьмемо необхідну к-сть матеріалу
+                        if collectItem ~= tArgs[2] then turtle.dropUp() itemToCraft = itemToCraft - 1 end -- Викидаємо непотрібний предмет
+                    until collectItem == tArgs[2] and itemToCraft == nLimit  -- Повторюємо поки не витягнемо потрібний предмет і ми не візьмемо необхідну к-сть матеріалу
 
                     -- Починаємо крафт
                     turtle.craft(nLimit) -- Крафтимо 4 * nLimit дошки

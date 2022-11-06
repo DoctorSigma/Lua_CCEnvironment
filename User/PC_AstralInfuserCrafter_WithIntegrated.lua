@@ -10,7 +10,7 @@ local idHasItem = 0
 local fHasItemFlag = false
 local tArgs = { ... }
 
-print("#Name: PC_AstralInfuserCrafter_WithIntegrated.lua# || #Version: 1.2.3#\n")
+print("#Version: 1.2.3# || #Name: PC_AstralInfuserCrafter_WithIntegrated.lua#\n")
 
 if nbtStorage ~= nil then
     if variableStore ~= nil then
