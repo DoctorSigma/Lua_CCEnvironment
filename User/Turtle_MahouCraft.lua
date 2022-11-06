@@ -15,7 +15,7 @@ local tArgs = { ... }
 if tArgs[1] == nil then tArgs[1] = "1" end  --TODO: забрати костиль, який виник через стару систему аргументів запуску
 local nLimit = tonumber(tArgs[1])
 
-print("#Name: TestTurtle.lua# || #Version: 1.1.2#\n")
+print("#Name: TestTurtle.lua# || #Version: 1.1.3#\n")
 
 if nLimit > 0 and nLimit <= 8 then
     if tArgs[2] == nil then tArgs[2] = "minecraft:oak_log" end --TODO: забрати костиль, який виник через стару систему аргументів запуску
@@ -28,7 +28,7 @@ if nLimit > 0 and nLimit <= 8 then
             end
 
             while true do
-                if outputChest.size() - #outputChest.list > 2 * nLimit  then -- Якщо є місце для крафту всіх компоненітв, то ...
+                if outputChest.size() - #outputChest.list() > 2 * nLimit  then -- Якщо є місце для крафту всіх компоненітв, то ...
                     -- Беремо предмет з вхідного сундука
                     turtle.select(1)
                     repeat
@@ -45,13 +45,14 @@ if nLimit > 0 and nLimit <= 8 then
                     turtle.craft(nLimit) -- Крафтимо 4 * nLimit палки
                     turtle.transferTo(6, 2 * nLimit) -- Переміщаємо до 6 слота 2 * nLimit отримані палки
                     turtle.transferTo(10, 2 * nLimit) -- Переміщаємо до 10 слота решту 2 * nLimit отримані палки
-                    turtle.craft(nLimit) -- Крафтимо 2 * nLimit лопати
+                    turtle.craft(2 * nLimit) -- Крафтимо 2 * nLimit лопати
 
                     -- Викидаємо результат вниз
                     for i = 1, (2 * nLimit) do
                         turtle.select(i)
                         turtle.dropDown()
                     end
+                    turtle.select(1)
                 end
             end
         else printError("No output chest under the turtle") end
