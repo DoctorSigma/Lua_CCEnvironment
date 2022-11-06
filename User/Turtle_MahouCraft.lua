@@ -15,7 +15,7 @@ local tArgs = { ... }
 if tArgs[1] == nil then tArgs[1] = "1" end  --TODO: забрати костиль, який виник через стару систему аргументів запуску
 local nLimit = tonumber(tArgs[1])
 
-print("#Version: 1.2.2# || #Name: TestTurtle.lua#\n")
+print("#Version: 1.2.3# || #Name: TestTurtle.lua#\n")
 
 print("Craft count at once: " .. tostring(nLimit))
 if nLimit > 0 and nLimit <= 8 then
@@ -35,9 +35,11 @@ if nLimit > 0 and nLimit <= 8 then
                     local itemToCraft = 0
                     repeat
                         nLimit = 1 --TODO: Вирішити проблему збільшенням к-сті можливих одночасних крафтів
-                        if #inputChest.list() == 0 then -- якщо предметів уже немає
+                        local isEmpty = 0
+                        for _, _ in pairs(inputChest.list()) do isEmpty = isEmpty + 1 end -- Проходимось по таблиці з данними з вхідного сундука і рахуємо їх к-сть
+                        if isEmpty == 0 then -- якщо предметів уже немає
                             if itemToCraft > 0 then nLimit = itemToCraft print("\nCraft count at now: " .. tostring(itemToCraft)) -- якщо ми взяли якісь предмети, то використаємо їх
-                            else return "InputChest is empty" end -- інакше завершуємо програму
+                            else print("InputChest is empty") return "InputChest is empty" end -- інакше завершуємо програму
                         end
                         turtle.suck(1) -- Беремо вхідний матеріал з вхідного сундука
                         itemToCraft = itemToCraft + 1
