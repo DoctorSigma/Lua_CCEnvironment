@@ -10,7 +10,7 @@ local idHasItem = 0
 local fHasItemFlag = false
 local tArgs = { ... }
 
-print("#Name: PC_AstralInfuserCrafter_WithIntegrated.lua# || #Version: 1.2.2#\n")
+print("#Name: PC_AstralInfuserCrafter_WithIntegrated.lua# || #Version: 1.2.3#\n")
 
 if nbtStorage ~= nil then
     if variableStore ~= nil then
@@ -46,7 +46,7 @@ if nbtStorage ~= nil then
                         tOutData.clickWithItemToCraft = false
                         tOutData.isSuckLiquid = true  --—початку пробуЇмо забрати зв≥дти р≥дину
                         nbtStorage.writeTable(tOutData)
-                        sleep(2.0)
+                        sleep(2.5)
                         tOutData.isSuckLiquid = false --—тавимо р≥дину на м≥сце тепер точно пустого м≥сц€
                         nbtStorage.writeTable(tOutData)
                         sleep(0.5)
