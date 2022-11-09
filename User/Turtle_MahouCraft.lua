@@ -15,7 +15,7 @@ local tArgs = { ... }
 if tArgs[1] == nil then tArgs[1] = "1" end  --TODO: забрати костиль, який виник через стару систему аргументів запуску
 local nLimit = tonumber(tArgs[1])
 
-print("#Version: 1.2.5# || #Name: TestTurtle.lua#\n")
+print("#Version: 1.2.6# || #Name: TestTurtle.lua#\n")
 
 print("Craft count at once: " .. tostring(nLimit))
 if nLimit > 0 and nLimit <= 8 then
@@ -29,6 +29,7 @@ if nLimit > 0 and nLimit <= 8 then
             end
 
             while true do
+                sleep(0.2)
                 local outChestCount = 0
                 outChestCount = 0
                 for _, _ in pairs(outputChest.list()) do outChestCount = outChestCount + 1 end
